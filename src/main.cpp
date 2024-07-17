@@ -7,40 +7,22 @@
 #include <memory>
 #include <stdexcept>
 #include <iostream>
+#include <llgl/ImguiSetup.hpp>
 
 
 int main(int argc, char* argv[])
 {
     std::unique_ptr<llgl::Llgl> llgl;
+    std::unique_ptr<llgl::ImguiSetup> imguiSetup;
 
     try {
-        llgl = std::make_unique<llgl::Llgl>("Cad", llgl::Size{1280, 720});
+        llgl       = std::make_unique<llgl::Llgl>("Cad", llgl::Size{1280, 720});
+        imguiSetup = std::make_unique<llgl::ImguiSetup>(llgl->getWindow());
     }
     catch(std::exception& ex) {
         std::cout << ex.what() << std::endl;
         return 1;
     }
-
-
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    (void) io;
-    io.ConfigFlags
-    |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-    io.ConfigFlags
-    |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
-
-    // Setup Platform/Renderer backends
-    // GL 3.0 + GLSL 130
-    const char* glsl_version = "#version 130";
-    ImGui_ImplGlfw_InitForOpenGL(llgl->getWindow(), true);
-    ImGui_ImplOpenGL3_Init(glsl_version);
 
 
 
@@ -141,10 +123,6 @@ int main(int argc, char* argv[])
         glfwSwapBuffers(llgl->getWindow());
     }
 
-    // Cleanup
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
 
     return 0;
 }
