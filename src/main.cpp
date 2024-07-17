@@ -3,26 +3,23 @@
 #include "imgui_impl_opengl3.h"
 #include <cstdio>
 #include <GLFW/glfw3.h>
-
+#include <llgl/Llgl.hpp>
+#include <memory>
+#include <stdexcept>
+#include <iostream>
 
 
 int main(int argc, char* argv[])
 {
-    if(glfwInit() == 0) {
+    std::unique_ptr<llgl::Llgl> llgl;
+
+    try {
+        llgl = std::make_unique<llgl::Llgl>("Cad", llgl::Size{1280, 720});
+    }
+    catch(std::exception& ex) {
+        std::cout << ex.what() << std::endl;
         return 1;
     }
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-
-
-    // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(
-    1280, 720, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
-    if(window == nullptr) {
-        return 1;
-    }
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
 
 
     // Setup Dear ImGui context
@@ -42,7 +39,7 @@ int main(int argc, char* argv[])
     // Setup Platform/Renderer backends
     // GL 3.0 + GLSL 130
     const char* glsl_version = "#version 130";
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplGlfw_InitForOpenGL(llgl->getWindow(), true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
 
@@ -66,7 +63,7 @@ int main(int argc, char* argv[])
     ImGuiStyle* style            = &ImGui::GetStyle();
     style->Colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
 
-    while(glfwWindowShouldClose(window) == 0) {
+    while(glfwWindowShouldClose(llgl->getWindow()) == 0) {
         glfwPollEvents();
 
         ImGui_ImplOpenGL3_NewFrame();
@@ -75,7 +72,7 @@ int main(int argc, char* argv[])
 
         int display_w{};
         int display_h{};
-        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glfwGetFramebufferSize(llgl->getWindow(), &display_w, &display_h);
 
 
         if(mode == Mode::NORMAL) {
@@ -141,16 +138,13 @@ int main(int argc, char* argv[])
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(llgl->getWindow());
     }
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
-
-    glfwDestroyWindow(window);
-    glfwTerminate();
 
     return 0;
 }
