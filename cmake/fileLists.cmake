@@ -1,10 +1,13 @@
 FILE(GLOB_RECURSE ALL_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/llgl/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/utest/*.cpp"
 )
 FILE(GLOB_RECURSE ALL_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/llgl/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/llgl/*.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/utest/*.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/utest/*.h"
 )
@@ -15,10 +18,13 @@ SET(ALL_FILES
 
 FILE(GLOB_RECURSE MAIN_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/llgl/*.cpp"
 )
 FILE(GLOB_RECURSE MAIN_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/llgl/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/llgl/*.h"
 )
 
 SET(FILE_MAIN_CPP ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
