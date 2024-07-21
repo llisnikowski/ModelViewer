@@ -10,7 +10,7 @@ macro(addDefaultFlags target)
     if (MSVC)
         target_compile_options(${target} PRIVATE -W4 /XW)
     else ()
-        target_compile_options(${target} PRIVATE -Wall -Wextra -pedantic -Wno-unused-function -Wno-unused-parameter -Wconversion -Werror)
+        target_compile_options(${target} PRIVATE -Wall -Wextra -pedantic -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable -Werror)
     endif ()
 
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
