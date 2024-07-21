@@ -27,10 +27,7 @@ void Llgl::init()
 {
     this->glfwInit();
     this->Window::init();
-
-#ifdef USE_GLAD
     gladLoadGL();
-#endif
 }
 
 void Llgl::glfwInit()
