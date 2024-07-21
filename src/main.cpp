@@ -1,4 +1,6 @@
 #include "imgui.h"
+#include <glad/glad.h>
+
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <cstdio>
@@ -8,6 +10,8 @@
 #include <stdexcept>
 #include <iostream>
 #include <llgl/ImguiSetup.hpp>
+#include "model/Model.hpp"
+
 
 
 int main(int argc, char* argv[])
@@ -23,8 +27,6 @@ int main(int argc, char* argv[])
         std::cout << ex.what() << std::endl;
         return 1;
     }
-
-
 
 
     enum class Mode
@@ -44,6 +46,10 @@ int main(int argc, char* argv[])
 
     ImGuiStyle* style            = &ImGui::GetStyle();
     style->Colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
+
+    Model model;
+
+
 
     while(glfwWindowShouldClose(llgl->getWindow()) == 0) {
         glfwPollEvents();
@@ -84,23 +90,13 @@ int main(int argc, char* argv[])
                 ImGuiCol_Button, IM_COL32(0, 255, 0, 255));
 
                 if(ImGui::Button("Line")) {
-                    if(drawFigure != DrawFigure::LINE) {
-                        drawFigure = DrawFigure::LINE;
-                    }
-                    else {
-                        drawFigure = DrawFigure::NONE;
-                    }
+                    drawFigure = DrawFigure::NONE;
                 }
                 ImGui::PopStyleColor();
             }
             else {
                 if(ImGui::Button("Line")) {
-                    if(drawFigure != DrawFigure::LINE) {
-                        drawFigure = DrawFigure::LINE;
-                    }
-                    else {
-                        drawFigure = DrawFigure::NONE;
-                    }
+                    drawFigure = DrawFigure::LINE;
                 }
             }
 
@@ -118,6 +114,10 @@ int main(int argc, char* argv[])
         glViewport(0, 0, display_w, display_h);
         glClearColor(0.45F, 0.55F, 0.60F, 1.00F);
         glClear(GL_COLOR_BUFFER_BIT);
+
+
+        model.draw();
+
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(llgl->getWindow());
