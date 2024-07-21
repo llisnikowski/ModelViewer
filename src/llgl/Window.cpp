@@ -58,9 +58,14 @@ void Window::setSize(Size size)
     this->size = size;
 }
 
-void Window::setName(std::string name)
+void Window::setName(const std::string &name)
 {
     this->name = name;
+}
+
+void Window::setName(std::string &&name)
+{
+    this->name = std::move(name);
 }
 
 Color Window::getBackgroundColor() const

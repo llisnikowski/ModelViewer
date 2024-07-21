@@ -9,7 +9,7 @@ namespace llgl
 class ImguiSetup
 {
 public:
-    ImguiSetup(GLFWwindow *window);
+    explicit ImguiSetup(GLFWwindow *window);
     ~ImguiSetup();
 };
 

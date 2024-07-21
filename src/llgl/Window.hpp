@@ -16,13 +16,14 @@ public:
     virtual ~Window();
 
     std::string getName() const;
-    void setName(std::string name);
+    void setName(const std::string &name);
+    void setName(std::string &&name);
     Size getSize() const;
     void setSize(Size size);
     Color getBackgroundColor() const;
     void setBackgroundColor(Color color);
 
-    GLFWwindow* getWindow() { return this->window; }
+    GLFWwindow *getWindow() { return this->window; }
 protected:
     void init();
 
@@ -30,7 +31,7 @@ private:
     std::string name;
     Size size;
     Color color;
-    GLFWwindow* window;
+    GLFWwindow *window;
 };
 
 } // namespace llgl

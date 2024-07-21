@@ -14,7 +14,16 @@ Shader::Shader(const std::string &shader, Type type)
     compile(shader, type);
 }
 
-Shader::Shader(std::string filename, Type type, LoadFromFile)
+Shader::Shader(std::string &&filename, Type type, LoadFromFile)
+{
+    std::string shader = loadFile(filename);
+    if(shader.empty())
+        throw std::invalid_argument{"File: " + filename + " is empty"};
+
+    compile(shader, type);
+}
+
+Shader::Shader(const std::string &filename, Type type, LoadFromFile)
 {
     std::string shader = loadFile(filename);
     if(shader.empty())
@@ -53,6 +62,7 @@ unsigned int Shader::getTypeNumber(Type type)
     switch(type) {
     case Type::VERTEX: return GL_VERTEX_SHADER;
     case Type::FRAGMENT: return GL_FRAGMENT_SHADER;
+    default: return 0;
     }
 }
 
