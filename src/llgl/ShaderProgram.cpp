@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include "llgl/Shader.hpp"
 #include <stdexcept>
+#include "llgl/Uniform.hpp"
 
 namespace llgl
 {
@@ -42,6 +43,11 @@ void ShaderProgram::link()
 void ShaderProgram::bind()
 {
     glUseProgram(this->shaderProgram);
+}
+
+Uniform ShaderProgram::getUniform(std::string &&name)
+{
+    return Uniform{glGetUniformLocation(this->shaderProgram, name.c_str())};
 }
 
 } // llgl

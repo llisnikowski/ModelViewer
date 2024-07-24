@@ -7,6 +7,7 @@
 #include "llgl/ElementBuffer.hpp"
 #include "llgl/Shader.hpp"
 #include "llgl/ShaderProgram.hpp"
+#include "llgl/Uniform.hpp"
 #include <iostream>
 
 Model::Model()
@@ -21,6 +22,7 @@ void Model::draw()
     vao->bind();
     ebo->bind();
     program->bind();
+    program->getUniform("position").setVec2(0.4, 0.2);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 }
 
@@ -32,9 +34,12 @@ void Model::init()
         vertexShader = std::make_shared<llgl::Shader>(
         R"--|shader|--(#version 450 core
 layout (location = 0) in vec3 aPos;
+
+uniform vec2 position;
+
 void main()
 {
-   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0) + vec4(position, 0, 0);
 }
 )--|shader|--",
         llgl::Shader::Type::VERTEX);
