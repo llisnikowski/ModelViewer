@@ -1,14 +1,6 @@
 #include "llgl/Window.hpp"
 
-#ifdef USE_GLAD
-#    include "glad/glad.h"
-#elif defined(USE_IMGUI)
-#    include "imgui.h"
-#    include "imgui_impl_glfw.h"
-#    include "imgui_impl_opengl3.h"
-#else
-#    error "you DON'T using glad"
-#endif
+#include "glad/glad.h"
 #include <GLFW/glfw3.h>
 #include <stdexcept>
 
@@ -66,9 +58,14 @@ void Window::setSize(Size size)
     this->size = size;
 }
 
-void Window::setName(std::string name)
+void Window::setName(const std::string &name)
 {
     this->name = name;
+}
+
+void Window::setName(std::string &&name)
+{
+    this->name = std::move(name);
 }
 
 Color Window::getBackgroundColor() const

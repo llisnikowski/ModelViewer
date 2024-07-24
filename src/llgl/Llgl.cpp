@@ -1,15 +1,6 @@
 #include "llgl/Llgl.hpp"
 
-#ifdef USE_GLAD
-#    include "glad/glad.h"
-#elif defined(USE_IMGUI)
-#    include "imgui.h"
-#    include "imgui_impl_glfw.h"
-#    include "imgui_impl_opengl3.h"
-#else
-#    error "you DON'T using glad"
-#endif
-
+#include "glad/glad.h"
 #include <GLFW/glfw3.h>
 #include <stdexcept>
 
@@ -36,10 +27,7 @@ void Llgl::init()
 {
     this->glfwInit();
     this->Window::init();
-
-#ifdef USE_GLAD
     gladLoadGL();
-#endif
 }
 
 void Llgl::glfwInit()

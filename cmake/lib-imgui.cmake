@@ -4,8 +4,6 @@ find_package(glfw3 REQUIRED)
 
 set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/imgui)
 
-add_compile_definitions(USE_IMGUI)
-
 file(GLOB IMGUI_SOURCES
     ${IMGUI_DIR}/*.cpp
 )
