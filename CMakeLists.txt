@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.13)
 
 project(cad)
 
+find_package(OpenGL REQUIRED)
+find_package(glfw3 REQUIRED)
+find_package(glm REQUIRED)
+
+
 include(cmake/lib-imgui.cmake)
 include(cmake/lib-glad.cmake)
 include(cmake/fileLists.cmake)
@@ -27,4 +32,5 @@ target_link_libraries(${PROJECT_NAME}
 PRIVATE
     imgui::imgui
     glad::glad
+    glm::glm
 )
