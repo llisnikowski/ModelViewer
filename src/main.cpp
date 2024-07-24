@@ -12,6 +12,12 @@
 #include <llgl/ImguiSetup.hpp>
 #include "model/Model.hpp"
 
+#include "CameraManager.hpp"
+
+
+void cursorPositionCallback(GLFWwindow* window, double x, double y);
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
 
 int main(int argc, char* argv[])
@@ -27,7 +33,6 @@ int main(int argc, char* argv[])
         std::cout << ex.what() << std::endl;
         return 1;
     }
-
 
     enum class Mode
     {
@@ -47,9 +52,11 @@ int main(int argc, char* argv[])
     ImGuiStyle* style            = &ImGui::GetStyle();
     style->Colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
 
-    Model model;
+    Model model{CameraManager::camera};
 
-
+    glfwSetCursorPosCallback(llgl->getWindow(), cursorPositionCallback);
+    glfwSetMouseButtonCallback(llgl->getWindow(), mouseButtonCallback);
+    glfwSetScrollCallback(llgl->getWindow(), scrollCallback);
 
     while(glfwWindowShouldClose(llgl->getWindow()) == 0) {
         glfwPollEvents();
@@ -61,7 +68,8 @@ int main(int argc, char* argv[])
         int display_w{};
         int display_h{};
         glfwGetFramebufferSize(llgl->getWindow(), &display_w, &display_h);
-
+        CameraManager::camera.setProjectonAspectRatio(
+        float(display_w) / float(display_h ? display_h : 1));
 
         if(mode == Mode::NORMAL) {
             ImGui::SetNextWindowPos(ImVec2{0, 0});
@@ -72,6 +80,14 @@ int main(int argc, char* argv[])
                 mode       = Mode::DRAW;
                 drawFigure = DrawFigure::NONE;
             }
+
+            auto pos = CameraManager::camera.getPosition();
+            auto rot = CameraManager::camera.getRotation();
+
+            ImGui::Text("Position");
+            ImGui::Text("[%.3f, %.3f, %.3f]", pos.x, pos.y, pos.z);
+            ImGui::Text("Rotation");
+            ImGui::Text("[%.3f, %.3f, %.3f]", rot.x, rot.y, rot.z);
 
             ImGui::End();
         }
@@ -125,4 +141,34 @@ int main(int argc, char* argv[])
 
 
     return 0;
+}
+
+
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    io.AddMouseButtonEvent(button, action == GLFW_PRESS);
+    if(io.WantCaptureMouse) return;
+
+    CameraManager::mouseButtonCallback(window, button, action, mods);
+}
+
+void cursorPositionCallback(GLFWwindow* window, double x, double y)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    io.AddMousePosEvent(x, y);
+
+    if(io.WantSetMousePos) {
+        return;
+    }
+
+    CameraManager::cursorPositionCallback(window, x, y);
+}
+
+void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    io.AddMouseWheelEvent(xoffset, yoffset);
+
+    CameraManager::scrollCallback(window, xoffset, yoffset);
 }
