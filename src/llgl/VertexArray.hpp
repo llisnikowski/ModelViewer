@@ -1,5 +1,4 @@
 #pragma once
-#include <memory>
 #include <type_traits>
 #include <vector>
 
@@ -25,20 +24,19 @@ public:
 
     template<typename AttribType = float>
     bool setAttrib(uint index, uint attribNumber, int fullSize, int offset,
-    std::shared_ptr<VertexBuffer> buffer, bool normalized = false);
+    VertexBuffer &buffer, bool normalized = false);
 
     bool setAttrib(uint index, uint attribNumber, int typeEnum, int fullSize,
-    int offset, std::shared_ptr<VertexBuffer> buffer, bool normalized = false);
+    int offset, VertexBuffer &buffer, bool normalized = false);
 
 private:
     unsigned int vao{};
-    std::vector<std::shared_ptr<VertexBuffer>> vbos;
 };
 
 
 template<typename AttribType>
 bool VertexArray::setAttrib(uint index, uint attribNumber, int fullSize,
-int offset, std::shared_ptr<VertexBuffer> buffer, bool normalized)
+int offset, VertexBuffer &buffer, bool normalized)
 {
     int typeEnum{};
     if constexpr(std::is_same_v<AttribType, float>) {

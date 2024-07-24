@@ -29,19 +29,12 @@ void VertexArray::unbind()
 }
 
 bool VertexArray::setAttrib(uint index, uint attribNumber, int typeEnum,
-int fullSize, int offset, std::shared_ptr<VertexBuffer> buffer, bool normalized)
+int fullSize, int offset, VertexBuffer &buffer, bool normalized)
 {
     if(typeEnum == 0) return false;
-    if(!buffer) return false;
-
-    if(std::find(this->vbos.begin(), this->vbos.end(), buffer)
-       == this->vbos.end())
-    {
-        this->vbos.push_back(buffer);
-    }
 
     this->bind();
-    buffer->bind();
+    buffer.bind();
 
     glVertexAttribPointer(index, attribNumber, typeEnum, normalized, fullSize,
     reinterpret_cast<void *>(offset));

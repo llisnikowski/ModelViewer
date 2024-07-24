@@ -85,7 +85,7 @@ void main()
     vbo->allocate(vertices, sizeof(vertices));
     ebo->allocate(indices, sizeof(indices));
 
-    vao->setAttrib<float>(0, 3, 3 * sizeof(float), 0, vbo);
+    vao->setAttrib<float>(0, 3, 3 * sizeof(float), 0, *vbo);
 
     ebo->bind();
     program->bind();
