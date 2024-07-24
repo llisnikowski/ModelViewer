@@ -10,26 +10,6 @@ glm::vec2 CameraManager::mousePressPosition{};
 bool CameraManager::rightButtonPress{};
 bool CameraManager::middleButtonPress{};
 
-void CameraManager::cursorPositionCallback(
-GLFWwindow* window, double x, double y)
-{
-    glm::vec2 diff{x - mousePressPosition.x, y - mousePressPosition.y};
-
-    if(diff.x == 0 && diff.y == 0) return;
-    mousePressPosition.x = x;
-    mousePressPosition.y = y;
-
-    if(rightButtonPress) {
-        float sensitivity = 150;
-        camera.move(-glm::vec3(diff.x, -diff.y, 0.f) / sensitivity);
-    }
-    if(middleButtonPress) {
-        glm::vec3 rotationAxis = glm::normalize(glm::vec3(diff.y, diff.x, 0.0));
-
-        float sensitivity = 1;
-        camera.rotate(rotationAxis, sensitivity);
-    }
-}
 
 void CameraManager::mouseButtonCallback(
 GLFWwindow* window, int button, int action, int mods)
@@ -59,6 +39,27 @@ GLFWwindow* window, int button, int action, int mods)
     }
 }
 
+void CameraManager::cursorPositionCallback(
+GLFWwindow* window, double x, double y)
+{
+    glm::vec2 diff{x - mousePressPosition.x, y - mousePressPosition.y};
+
+    if(diff.x == 0 && diff.y == 0) return;
+    mousePressPosition.x = x;
+    mousePressPosition.y = y;
+
+    if(rightButtonPress) {
+        static constexpr float sensitivity = 150;
+        camera.move(-glm::vec3(diff.x, -diff.y, 0.f) / sensitivity);
+    }
+    if(middleButtonPress) {
+        glm::vec3 rotationAxis = glm::normalize(glm::vec3(diff.y, diff.x, 0.0));
+
+        float sensitivity = glm::length(diff) / 4.f;
+        camera.rotate(rotationAxis, sensitivity);
+    }
+}
+
 void CameraManager::scrollCallback(
 GLFWwindow* window, double xoffset, double yoffset)
 {
@@ -70,4 +71,18 @@ GLFWwindow* window, double xoffset, double yoffset)
 
     glm::vec3 moveDir = glm::vec3(0.f, 0.f, -1.f * yoffset / 10.0);
     camera.move(moveDir);
+
+
+    int display_w{};
+    int display_h{};
+    glfwGetFramebufferSize(window, &display_w, &display_h);
+
+    glm::vec2 middlePoint(display_w / 2.f, display_h / 2.f);
+    static constexpr float sensitivity = 2000;
+    if(yoffset > 0) {
+        camera.move(glm::vec3(mousePosition - middlePoint, 0) / sensitivity);
+    }
+    else if(yoffset < 0) {
+        camera.move(-glm::vec3(mousePosition - middlePoint, 0) / sensitivity);
+    }
 }

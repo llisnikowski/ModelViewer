@@ -7,9 +7,9 @@ struct GLFWwindow;
 class CameraManager
 {
 public:
-    static void cursorPositionCallback(GLFWwindow* window, double x, double y);
     static void mouseButtonCallback(
     GLFWwindow* window, int button, int action, int mods);
+    static void cursorPositionCallback(GLFWwindow* window, double x, double y);
     static void scrollCallback(
     GLFWwindow* window, double xoffset, double yoffset);
 
