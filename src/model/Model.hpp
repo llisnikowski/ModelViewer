@@ -2,6 +2,8 @@
 #include <array>
 #include <memory>
 
+class Camera;
+
 namespace llgl
 {
 class VertexArray;
@@ -19,7 +21,7 @@ public:
         std::array<float, 3> pos;
     };
 
-    Model();
+    explicit Model(Camera &camera);
     ~Model();
 
     void draw();
@@ -29,6 +31,8 @@ private:
     void init();
 
     int triangleCount{};
+
+    Camera &camera;
 
     std::unique_ptr<llgl::VertexArray> vao;
     std::shared_ptr<llgl::VertexBuffer> vbo;
