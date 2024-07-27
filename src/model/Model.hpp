@@ -16,11 +16,6 @@ class ShaderProgram;
 class Model
 {
 public:
-    struct VertexData
-    {
-        std::array<float, 3> pos;
-    };
-
     explicit Model(Camera &camera);
     ~Model();
 
