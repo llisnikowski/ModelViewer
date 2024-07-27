@@ -58,6 +58,9 @@ int main(int argc, char* argv[])
     glfwSetMouseButtonCallback(llgl->getWindow(), mouseButtonCallback);
     glfwSetScrollCallback(llgl->getWindow(), scrollCallback);
 
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_ALWAYS);
+
     while(glfwWindowShouldClose(llgl->getWindow()) == 0) {
         glfwPollEvents();
 
@@ -129,8 +132,9 @@ int main(int argc, char* argv[])
         ImGui::Render();
         glViewport(0, 0, display_w, display_h);
         glClearColor(0.45F, 0.55F, 0.60F, 1.00F);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glLineWidth(2);
 
         model.draw();
 

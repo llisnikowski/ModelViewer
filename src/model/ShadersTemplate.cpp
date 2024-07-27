@@ -15,9 +15,12 @@ void main()
 
 const char* simpleFS =
 R"--|shader|--(#version 330 core
+
+uniform vec3 color;
 out vec4 FragColor;
+
 void main()
 {
-   FragColor = vec4(0.5f, 0.8f, 0.4f, 1.0f);
+   FragColor = vec4(color, 1.0f);
 }
 )--|shader|--";

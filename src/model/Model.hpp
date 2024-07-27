@@ -25,7 +25,11 @@ private:
     void loadShader();
     void init();
 
+    void initData();
+    void initProgram();
+
     int triangleCount{};
+    int edgeCount{};
 
     Camera &camera;
 
@@ -35,4 +39,7 @@ private:
     std::unique_ptr<llgl::ShaderProgram> program;
     std::shared_ptr<llgl::Shader> vertexShader;
     std::shared_ptr<llgl::Shader> fragmentShader;
+
+    std::unique_ptr<llgl::VertexArray> vaoEdge;
+    std::shared_ptr<llgl::ElementBuffer> eboEdge;
 };
