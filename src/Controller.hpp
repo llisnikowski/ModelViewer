@@ -1,9 +1,13 @@
 #pragma once
+#include <vector>
+#include <ModelView.hpp>
 
 
 class Controller
 {
 public:
+    Controller();
+
     enum class Mode
     {
         NORMAL,
@@ -24,4 +28,7 @@ public:
     DrawFigure getDrawFigure() const;
 private:
     DrawFigure drawFigure{};
+
+public:
+    std::vector<ModelView> modelView;
 };

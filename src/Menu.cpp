@@ -8,6 +8,7 @@
 #include "imgui_impl_opengl3.h"
 
 
+
 Menu::Menu(Controller &controller, llgl::Size &windowSize)
 : controller{controller}
 , windowSize{windowSize}
@@ -29,6 +30,8 @@ void Menu::draw()
         drawDraw();
         ImGui::End();
     }
+
+    drawTree();
 }
 
 void Menu::drawNormal()
@@ -70,5 +73,29 @@ void Menu::drawDraw()
     switch(controller.getDrawFigure()) {
     case Controller::DrawFigure::LINE: ImGui::Text("Draw Line"); break;
     case Controller::DrawFigure::NONE: break;
+    }
+}
+
+void Menu::drawTree()
+{
+    // todo
+    ImGui::Begin("Tree");
+    for(ModelView &view: controller.modelView) {
+        drawBranch(view.group.cbegin(), view.group.cend(),
+        [&view]() { ImGui::Checkbox(view.name.c_str(), &view.show); });
+    }
+    ImGui::End();
+}
+
+void Menu::drawBranch(ItStr begin, ItStr end, std::function<void()> func)
+{
+    if(begin < end) {
+        if(ImGui::TreeNode(begin->c_str())) {
+            drawBranch(begin + 1, end, func);
+            ImGui::TreePop();
+        }
+    }
+    else {
+        func();
     }
 }
