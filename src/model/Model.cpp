@@ -9,9 +9,9 @@
 #include "llgl/ShaderProgram.hpp"
 #include "llgl/Uniform.hpp"
 #include <iostream>
-#include "Camera.hpp"
-#include "ShadersTemplate.hpp"
-#include "ExampleData.hpp"
+#include "camera/Camera.hpp"
+#include "dataTemplates/ShadersTemplate.hpp"
+#include "dataTemplates/ExampleData.hpp"
 
 
 Model::Model(Camera &camera)
@@ -37,8 +37,6 @@ void Model::draw()
     eboEdge->bind();
     glDrawElements(GL_LINES, edgeCount, GL_UNSIGNED_SHORT, nullptr);
 }
-
-void loadShader() {}
 
 void Model::init()
 {

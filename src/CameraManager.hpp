@@ -1,5 +1,5 @@
 #pragma once
-#include "model/Camera.hpp"
+#include "camera/Camera.hpp"
 #include "glm/glm.hpp"
 
 struct GLFWwindow;
