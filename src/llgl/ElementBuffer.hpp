@@ -6,6 +6,9 @@ namespace llgl
 
 class ElementBuffer : public Buffer
 {
+public:
+    static void unbind();
+
 private:
     unsigned int getBufforTypeId() override;
 };

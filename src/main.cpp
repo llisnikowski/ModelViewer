@@ -16,6 +16,7 @@
 
 #include "Controller.hpp"
 #include "Menu.hpp"
+#include "reference/MainAxis.hpp"
 
 void resizeWindowCallback(GLFWwindow* window, int width, int height);
 llgl::Size windowSize{1280, 720};
@@ -48,6 +49,8 @@ int main(int argc, char* argv[])
 
     Model model{CameraManager::camera};
 
+    MainAxis mainAxis{CameraManager::camera};
+
     glfwSetFramebufferSizeCallback(llgl->getWindow(), resizeWindowCallback);
 
     glfwSetCursorPosCallback(llgl->getWindow(), cursorPositionCallback);
@@ -75,6 +78,7 @@ int main(int argc, char* argv[])
         glLineWidth(2);
 
         model.draw();
+        mainAxis.draw();
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
