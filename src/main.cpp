@@ -14,9 +14,11 @@
 
 #include "CameraManager.hpp"
 
+#include "Controller.hpp"
+#include "Menu.hpp"
 
 void resizeWindowCallback(GLFWwindow* window, int width, int height);
-llgl::Size windowsSize{1280, 720};
+llgl::Size windowSize{1280, 720};
 
 void cursorPositionCallback(GLFWwindow* window, double x, double y);
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
@@ -29,7 +31,7 @@ int main(int argc, char* argv[])
     std::unique_ptr<llgl::ImguiSetup> imguiSetup;
 
     try {
-        llgl       = std::make_unique<llgl::Llgl>("Cad", windowsSize);
+        llgl       = std::make_unique<llgl::Llgl>("Cad", windowSize);
         imguiSetup = std::make_unique<llgl::ImguiSetup>(llgl->getWindow());
     }
     catch(std::exception& ex) {
@@ -38,27 +40,11 @@ int main(int argc, char* argv[])
     }
 
     CameraManager::camera.setProjectonAspectRatio(
-    float(windowsSize.width)
-    / float(windowsSize.height ? windowsSize.height : 1));
+    float(windowSize.width) / float(windowSize.height ? windowSize.height : 1));
 
-    enum class Mode
-    {
-        NORMAL,
-        DRAW,
-    };
-    Mode mode{Mode::NORMAL};
 
-    enum class DrawFigure
-    {
-        NONE,
-        LINE,
-    };
-
-    DrawFigure drawFigure{};
-
-    ImGuiStyle* style            = &ImGui::GetStyle();
-    style->Colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.00f);
-
+    Controller controller{};
+    Menu menu{controller, windowSize};
 
     Model model{CameraManager::camera};
 
@@ -78,64 +64,11 @@ int main(int argc, char* argv[])
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-
-        if(mode == Mode::NORMAL) {
-            ImGui::SetNextWindowPos(ImVec2{0, 0});
-            ImGui::SetNextWindowSize(ImVec2{200, (float) windowsSize.height});
-            ImGui::Begin("Operation");
-
-            if(ImGui::Button("Draw")) {
-                mode       = Mode::DRAW;
-                drawFigure = DrawFigure::NONE;
-            }
-
-            auto pos = CameraManager::camera.getPosition();
-            auto rot = CameraManager::camera.getRotation();
-
-            ImGui::Text("Position");
-            ImGui::Text("[%.3f, %.3f, %.3f]", pos.x, pos.y, pos.z);
-            ImGui::Text("Rotation");
-            ImGui::Text("[%.3f, %.3f, %.3f]", rot.x, rot.y, rot.z);
-
-            ImGui::End();
-        }
-
-        if(mode == Mode::DRAW) {
-            ImGui::SetNextWindowPos(ImVec2{0, 0});
-            ImGui::SetNextWindowSize(ImVec2{200, (float) windowsSize.height});
-            ImGui::Begin("Draw");
-
-            if(ImGui::Button("Exit draw")) {
-                mode = Mode::NORMAL;
-            }
-
-            if(drawFigure == DrawFigure::LINE) {
-                ImGui::PushStyleColor(
-                ImGuiCol_Button, IM_COL32(0, 255, 0, 255));
-
-                if(ImGui::Button("Line")) {
-                    drawFigure = DrawFigure::NONE;
-                }
-                ImGui::PopStyleColor();
-            }
-            else {
-                if(ImGui::Button("Line")) {
-                    drawFigure = DrawFigure::LINE;
-                }
-            }
-
-            switch(drawFigure) {
-            case DrawFigure::LINE: ImGui::Text("Draw Line"); break;
-            case DrawFigure::NONE: break;
-            }
-
-            ImGui::End();
-        }
-
+        menu.draw();
 
         // Rendering
         ImGui::Render();
-        glViewport(0, 0, windowsSize.width, windowsSize.height);
+        glViewport(0, 0, windowSize.width, windowSize.height);
         glClearColor(0.45F, 0.55F, 0.60F, 1.00F);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -154,8 +87,8 @@ int main(int argc, char* argv[])
 
 void resizeWindowCallback(GLFWwindow* window, int width, int height)
 {
-    windowsSize.width  = width;
-    windowsSize.height = height;
+    windowSize.width  = width;
+    windowSize.height = height;
 
     CameraManager::camera.setProjectonAspectRatio(
     float(width) / float(height ? height : 1));
