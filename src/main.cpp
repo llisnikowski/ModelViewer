@@ -10,6 +10,8 @@
 #include <stdexcept>
 #include <iostream>
 #include <llgl/ImguiSetup.hpp>
+#include "llgl/ShaderProgram.hpp"
+#include "llgl/Uniform.hpp"
 #include "model/Model.hpp"
 
 #include "CameraManager.hpp"
@@ -18,8 +20,18 @@
 #include "Menu.hpp"
 #include "reference/MainAxis.hpp"
 
+#include "dataTemplates/ShadersManager.hpp"
+
+
 void resizeWindowCallback(GLFWwindow* window, int width, int height);
 llgl::Size windowSize{1280, 720};
+
+struct
+{
+    bool IsPressed = false;
+    int x;
+    int y;
+} mouseInfo;
 
 void cursorPositionCallback(GLFWwindow* window, double x, double y);
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
@@ -47,9 +59,12 @@ int main(int argc, char* argv[])
     Controller controller{};
     Menu menu{controller, windowSize};
 
-    Model model{CameraManager::camera};
+    ShaderManager shaderManager;
 
-    MainAxis mainAxis{CameraManager::camera};
+    Model model;
+
+    MainAxis mainAxis;
+
 
     glfwSetFramebufferSizeCallback(llgl->getWindow(), resizeWindowCallback);
 
@@ -77,8 +92,24 @@ int main(int argc, char* argv[])
 
         glLineWidth(2);
 
-        model.draw();
-        mainAxis.draw();
+        {
+            auto shader = shaderManager.getSimple();
+            shader->bind();
+            shader->getUniform("mvp").setMat4(
+            CameraManager::camera.getProjection()
+            * CameraManager::camera.getView());
+            model.draw(shader);
+        }
+
+        {
+            glDisable(GL_DEPTH_TEST);
+            auto shader = shaderManager.getSimpleColor();
+            shader->bind();
+            shader->getUniform("mvp").setMat4(
+            CameraManager::camera.getProjection()
+            * CameraManager::camera.getView());
+            mainAxis.draw();
+        }
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -109,6 +140,10 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 
 void cursorPositionCallback(GLFWwindow* window, double x, double y)
 {
+    mouseInfo.x = x;
+    mouseInfo.y = y;
+    // std::cout << "mouse: " << mouseInfo.x << ": " << mouseInfo.y << std::endl;
+
     ImGuiIO& io = ImGui::GetIO();
     io.AddMousePosEvent(x, y);
 

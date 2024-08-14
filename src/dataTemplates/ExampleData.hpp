@@ -1,10 +1,5 @@
 #pragma once
-#include <array>
-
-struct VertexData
-{
-    std::array<float, 3> pos;
-};
+#include "VertexData.hpp"
 
 
 extern VertexData cubeVertices[24];
