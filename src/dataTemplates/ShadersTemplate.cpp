@@ -52,3 +52,31 @@ void main()
    FragColor = vec4(ourColor, 1.0f);
 }
 )--|shader|--";
+
+
+const char* pickingVs =
+R"--|shader|--(#version 330
+
+layout (location = 0) in vec3 aPos;
+
+uniform mat4 mvp;
+
+void main()
+{
+    gl_Position = mvp * vec4(aPos, 1.0);
+}
+)--|shader|--";
+
+const char* pickingFs =
+R"--|shader|--(#version 330
+
+uniform uint gObjectIndex;
+uniform uint gDrawIndex;
+
+out uvec3 FragColor;
+
+void main()
+{
+   FragColor = uvec3(gObjectIndex, gDrawIndex, gl_PrimitiveID);
+}
+)--|shader|--";

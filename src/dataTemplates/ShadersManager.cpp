@@ -13,11 +13,15 @@ ShaderManager::ShaderManager()
         = std::make_unique<llgl::Shader>(simpleVS, llgl::Shader::Type::VERTEX);
         simpleColorVso = std::make_unique<llgl::Shader>(
         posAndColorVs, llgl::Shader::Type::VERTEX);
+        pickingVso
+        = std::make_unique<llgl::Shader>(pickingVs, llgl::Shader::Type::VERTEX);
 
         simpleFso = std::make_unique<llgl::Shader>(
         simpleFS, llgl::Shader::Type::FRAGMENT);
         simpleColorFso
         = std::make_unique<llgl::Shader>(colorFs, llgl::Shader::Type::FRAGMENT);
+        pickingFso = std::make_unique<llgl::Shader>(
+        pickingFs, llgl::Shader::Type::FRAGMENT);
     }
     catch(std::invalid_argument &ex) {
         std::cout << ex.what() << std::endl;
@@ -33,6 +37,11 @@ ShaderManager::ShaderManager()
     simpleColor->addShader(*simpleColorVso);
     simpleColor->addShader(*simpleColorFso);
     simpleColor->link();
+
+    picking = std::make_shared<llgl::ShaderProgram>();
+    picking->addShader(*pickingVso);
+    picking->addShader(*pickingFso);
+    picking->link();
 }
 
 ShaderManager::~ShaderManager() = default;
@@ -53,4 +62,13 @@ std::shared_ptr<llgl::ShaderProgram> ShaderManager::getSimpleColor()
 void ShaderManager::useSimpleColor()
 {
     simpleColor->bind();
+}
+
+void ShaderManager::usePicking()
+{
+    picking->bind();
+}
+std::shared_ptr<llgl::ShaderProgram> ShaderManager::getPicking()
+{
+    return picking;
 }

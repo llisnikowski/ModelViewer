@@ -19,6 +19,8 @@
 #include "Controller.hpp"
 #include "Menu.hpp"
 #include "reference/MainAxis.hpp"
+#include "reference/RefCube.hpp"
+#include "reycast/Picking.hpp"
 
 #include "dataTemplates/ShadersManager.hpp"
 
@@ -37,6 +39,8 @@ void cursorPositionCallback(GLFWwindow* window, double x, double y);
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
+std::unique_ptr<RefCube> refCube;
+std::unique_ptr<Picking> picking;
 
 int main(int argc, char* argv[])
 {
@@ -60,11 +64,15 @@ int main(int argc, char* argv[])
     Menu menu{controller, windowSize};
 
     ShaderManager shaderManager;
+    picking = std::make_unique<Picking>(
+    llgl::Size{windowSize.width, windowSize.height});
 
     Model model;
 
     MainAxis mainAxis;
+    refCube = std::make_unique<RefCube>();
 
+    picking->addObject(refCube.get());
 
     glfwSetFramebufferSizeCallback(llgl->getWindow(), resizeWindowCallback);
 
@@ -72,8 +80,6 @@ int main(int argc, char* argv[])
     glfwSetMouseButtonCallback(llgl->getWindow(), mouseButtonCallback);
     glfwSetScrollCallback(llgl->getWindow(), scrollCallback);
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_ALWAYS);
 
     while(glfwWindowShouldClose(llgl->getWindow()) == 0) {
         glfwPollEvents();
@@ -90,7 +96,17 @@ int main(int argc, char* argv[])
         glClearColor(0.45F, 0.55F, 0.60F, 1.00F);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glLineWidth(2);
+
+        glEnable(GL_DEPTH_TEST);
+        {
+            auto shader = shaderManager.getPicking();
+            shader->bind();
+            shader->getUniform("mvp").setMat4(
+            CameraManager::camera.getProjection()
+            * CameraManager::camera.getView());
+            picking->check(
+            shader, mouseInfo.x, windowSize.height - mouseInfo.y - 1);
+        }
 
         {
             auto shader = shaderManager.getSimple();
@@ -98,7 +114,8 @@ int main(int argc, char* argv[])
             shader->getUniform("mvp").setMat4(
             CameraManager::camera.getProjection()
             * CameraManager::camera.getView());
-            model.draw(shader);
+            refCube->draw(shader);
+            // model.draw(shader);
         }
 
         {
@@ -127,6 +144,8 @@ void resizeWindowCallback(GLFWwindow* window, int width, int height)
 
     CameraManager::camera.setProjectonAspectRatio(
     float(width) / float(height ? height : 1));
+
+    picking->setWindowSize(windowSize);
 }
 
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
