@@ -12,6 +12,8 @@ public:
 
     void allocate(const void *data, int size);
 
+    void changeDate(const void *data, int size);
+
     void bind();
     void unbind();
 
