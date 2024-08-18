@@ -1,11 +1,20 @@
 #pragma once
+#include <memory>
+#include <optional>
+#include <thread>
+
 #include "glm/glm.hpp"
-#include <glm/gtc/quaternion.hpp>
+#include "glm/gtc/quaternion.hpp"
+
+#include "CameraMotion.hpp"
+
+struct CameraPosition;
 
 class Camera
 {
 public:
     Camera();
+    ~Camera();
 
     void setProjectonAspectRatio(double aspect);
     const glm::mat4 &getProjection() const;
@@ -16,12 +25,21 @@ public:
 
     glm::vec3 getPosition() const;
     glm::vec3 getRotation() const;
+    glm::quat getRotationQuad() const;
+
+    void setPosition(CameraPosition newPositino);
 
 private:
     void updateView();
+    void motionTask();
 
     glm::mat4 projection{};
-    glm::quat rotation{};
+    glm::quat rotation{1, 0, 0, 0};
     glm::vec3 position{0.f, 0.f, 4};
     glm::mat4 view{};
+
+    std::atomic<bool> exit{};
+    std::thread motionTaskHandler;
+    std::mutex cameraMotionMutex;
+    std::optional<CameraMotion> cameraMotion;
 };
