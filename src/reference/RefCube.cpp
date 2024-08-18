@@ -12,8 +12,12 @@
 #include "dataTemplates/VertexData.hpp"
 #include "dataTemplates/ExampleData.hpp"
 
+#include "camera/Camera.hpp"
+#include "camera/CameraPosition.hpp"
 
-RefCube::RefCube()
+
+RefCube::RefCube(Camera &camera)
+: camera{camera}
 {
     init();
 }
@@ -53,6 +57,27 @@ void RefCube::mouseEntered(unsigned int primID)
 void RefCube::mouseExited()
 {
     this->mouseState.mouseEnter = false;
+}
+
+void RefCube::click()
+{
+    if(!this->mouseState.mouseEnter) return;
+
+    static std::array<glm::vec3, 6> predefPosition{
+    glm::vec3{ 0.f,  0.f,  1.f},
+    glm::vec3{ 1.f,  0.f,  0.f},
+    glm::vec3{ 0.f,  1.f,  0.f},
+    glm::vec3{ 0.f,  0.f, -1.f},
+    glm::vec3{-1.f,  0.f,  0.f},
+    glm::vec3{ 0.f, -1.f,  0.f}
+    };
+
+    unsigned int posIndex = mouseState.primID / 2;
+    if(posIndex >= predefPosition.size()) return;
+
+    CameraPosition newPositino;
+    newPositino.setRotation(predefPosition[posIndex]);
+    camera.setPosition(newPositino);
 }
 
 

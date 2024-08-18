@@ -29,12 +29,16 @@
 void resizeWindowCallback(GLFWwindow* window, int width, int height);
 llgl::Size windowSize{1280, 720};
 
-struct
+struct MousePosition
 {
-    bool IsPressed = false;
     int x;
     int y;
-} mouseInfo;
+};
+
+MousePosition mouseInfo;
+MousePosition leftButtonClickInfo;
+
+void rightButtonClickCallback();
 
 void cursorPositionCallback(GLFWwindow* window, double x, double y);
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
@@ -72,7 +76,7 @@ int main(int argc, char* argv[])
     Model model;
 
     MainAxis mainAxis;
-    refCube = std::make_unique<RefCube>();
+    refCube = std::make_unique<RefCube>(*CameraManager::camera);
 
     picking->addObject(refCube.get());
 
@@ -120,6 +124,7 @@ int main(int argc, char* argv[])
         }
 
         {
+            glLineWidth(2);
             glDisable(GL_DEPTH_TEST);
             auto shader = shaderManager.getSimpleColor();
             shader->bind();
@@ -156,13 +161,30 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
     if(io.WantCaptureMouse) return;
 
     CameraManager::mouseButtonCallback(window, button, action, mods);
+
+
+
+    if(button == GLFW_MOUSE_BUTTON_LEFT) {
+        if(action == GLFW_PRESS) {
+            leftButtonClickInfo.x = mouseInfo.x;
+            leftButtonClickInfo.y = mouseInfo.y;
+        }
+        else if(action == GLFW_RELEASE) {
+            if(mouseInfo.x > leftButtonClickInfo.x - 5
+               && mouseInfo.x < leftButtonClickInfo.x + 5
+               && mouseInfo.y > leftButtonClickInfo.y - 5
+               && mouseInfo.y < leftButtonClickInfo.y + 5)
+            {
+                rightButtonClickCallback();
+            }
+        }
+    }
 }
 
 void cursorPositionCallback(GLFWwindow* window, double x, double y)
 {
     mouseInfo.x = x;
     mouseInfo.y = y;
-    // std::cout << "mouse: " << mouseInfo.x << ": " << mouseInfo.y << std::endl;
 
     ImGuiIO& io = ImGui::GetIO();
     io.AddMousePosEvent(x, y);
@@ -180,4 +202,9 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
     io.AddMouseWheelEvent(xoffset, yoffset);
 
     CameraManager::scrollCallback(window, xoffset, yoffset);
+}
+
+void rightButtonClickCallback()
+{
+    refCube->click();
 }

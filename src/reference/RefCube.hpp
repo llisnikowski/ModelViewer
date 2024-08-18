@@ -11,11 +11,12 @@ class VertexBuffer;
 class ElementBuffer;
 class ShaderProgram;
 }
+class Camera;
 
 class RefCube : public PickingObject
 {
 public:
-    explicit RefCube();
+    explicit RefCube(Camera &camera);
     ~RefCube();
 
     void draw(std::shared_ptr<llgl::ShaderProgram> program);
@@ -23,6 +24,8 @@ public:
 
     void mouseEntered(unsigned int primID) override;
     void mouseExited() override;
+
+    void click();
 
 private:
     void loadShader();
@@ -47,4 +50,6 @@ private:
 
     std::unique_ptr<llgl::VertexArray> vaoCubeEdge;
     std::shared_ptr<llgl::ElementBuffer> eboCubeEdge;
+
+    Camera &camera;
 };
