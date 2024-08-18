@@ -1,6 +1,7 @@
 #pragma once
 #include "camera/Camera.hpp"
 #include "glm/glm.hpp"
+#include <memory>
 
 struct GLFWwindow;
 
@@ -13,7 +14,9 @@ public:
     static void scrollCallback(
     GLFWwindow* window, double xoffset, double yoffset);
 
-    static Camera camera;
+    static void init();
+
+    static std::unique_ptr<Camera> camera;
 
 private:
     static glm::vec2 mousePressPosition;

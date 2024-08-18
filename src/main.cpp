@@ -20,6 +20,7 @@
 #include "Menu.hpp"
 #include "reference/MainAxis.hpp"
 #include "reference/RefCube.hpp"
+
 #include "reycast/Picking.hpp"
 
 #include "dataTemplates/ShadersManager.hpp"
@@ -55,8 +56,9 @@ int main(int argc, char* argv[])
         std::cout << ex.what() << std::endl;
         return 1;
     }
+    CameraManager::init();
 
-    CameraManager::camera.setProjectonAspectRatio(
+    CameraManager::camera->setProjectonAspectRatio(
     float(windowSize.width) / float(windowSize.height ? windowSize.height : 1));
 
 
@@ -80,7 +82,6 @@ int main(int argc, char* argv[])
     glfwSetMouseButtonCallback(llgl->getWindow(), mouseButtonCallback);
     glfwSetScrollCallback(llgl->getWindow(), scrollCallback);
 
-
     while(glfwWindowShouldClose(llgl->getWindow()) == 0) {
         glfwPollEvents();
 
@@ -102,8 +103,8 @@ int main(int argc, char* argv[])
             auto shader = shaderManager.getPicking();
             shader->bind();
             shader->getUniform("mvp").setMat4(
-            CameraManager::camera.getProjection()
-            * CameraManager::camera.getView());
+            CameraManager::camera->getProjection()
+            * CameraManager::camera->getView());
             picking->check(
             shader, mouseInfo.x, windowSize.height - mouseInfo.y - 1);
         }
@@ -112,8 +113,8 @@ int main(int argc, char* argv[])
             auto shader = shaderManager.getSimple();
             shader->bind();
             shader->getUniform("mvp").setMat4(
-            CameraManager::camera.getProjection()
-            * CameraManager::camera.getView());
+            CameraManager::camera->getProjection()
+            * CameraManager::camera->getView());
             refCube->draw(shader);
             // model.draw(shader);
         }
@@ -123,8 +124,8 @@ int main(int argc, char* argv[])
             auto shader = shaderManager.getSimpleColor();
             shader->bind();
             shader->getUniform("mvp").setMat4(
-            CameraManager::camera.getProjection()
-            * CameraManager::camera.getView());
+            CameraManager::camera->getProjection()
+            * CameraManager::camera->getView());
             mainAxis.draw();
         }
 
@@ -142,7 +143,7 @@ void resizeWindowCallback(GLFWwindow* window, int width, int height)
     windowSize.width  = width;
     windowSize.height = height;
 
-    CameraManager::camera.setProjectonAspectRatio(
+    CameraManager::camera->setProjectonAspectRatio(
     float(width) / float(height ? height : 1));
 
     picking->setWindowSize(windowSize);

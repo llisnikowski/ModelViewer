@@ -4,12 +4,16 @@
 #include <GLFW/glfw3.h>
 
 
-Camera CameraManager::camera{};
+std::unique_ptr<Camera> CameraManager::camera{};
 glm::vec2 CameraManager::mousePressPosition{};
 
 bool CameraManager::rightButtonPress{};
 bool CameraManager::middleButtonPress{};
 
+void CameraManager::init()
+{
+    camera = std::make_unique<Camera>();
+}
 
 void CameraManager::mouseButtonCallback(
 GLFWwindow* window, int button, int action, int mods)
@@ -50,13 +54,13 @@ GLFWwindow* window, double x, double y)
 
     if(rightButtonPress) {
         static constexpr float sensitivity = 150;
-        camera.move(-glm::vec3(diff.x, -diff.y, 0.f) / sensitivity);
+        camera->move(-glm::vec3(diff.x, -diff.y, 0.f) / sensitivity);
     }
     if(middleButtonPress) {
         glm::vec3 rotationAxis = glm::normalize(glm::vec3(diff.y, diff.x, 0.0));
 
         float sensitivity = glm::length(diff) / 4.f;
-        camera.rotate(rotationAxis, sensitivity);
+        camera->rotate(rotationAxis, sensitivity);
     }
 }
 
@@ -70,7 +74,7 @@ GLFWwindow* window, double xoffset, double yoffset)
     mousePosition.y = y;
 
     glm::vec3 moveDir = glm::vec3(0.f, 0.f, -1.f * yoffset / 10.0);
-    camera.move(moveDir);
+    camera->move(moveDir);
 
 
     int display_w{};
@@ -80,9 +84,9 @@ GLFWwindow* window, double xoffset, double yoffset)
     glm::vec2 middlePoint(display_w / 2.f, display_h / 2.f);
     static constexpr float sensitivity = 2000;
     if(yoffset > 0) {
-        camera.move(glm::vec3(mousePosition - middlePoint, 0) / sensitivity);
+        camera->move(glm::vec3(mousePosition - middlePoint, 0) / sensitivity);
     }
     else if(yoffset < 0) {
-        camera.move(-glm::vec3(mousePosition - middlePoint, 0) / sensitivity);
+        camera->move(-glm::vec3(mousePosition - middlePoint, 0) / sensitivity);
     }
 }
