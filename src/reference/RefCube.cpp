@@ -77,6 +77,7 @@ void RefCube::click()
 
     CameraPosition newPositino;
     newPositino.setRotation(predefPosition[posIndex]);
+    newPositino.alignRotation = true;
     camera.setPosition(newPositino);
 }
 

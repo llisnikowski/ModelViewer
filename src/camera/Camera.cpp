@@ -85,13 +85,14 @@ void Camera::setPosition(CameraPosition newPositino)
         = glm::normalize(rotation * glm::cross(currentDir, targetDirect));
         auto angle = glm::angle(currentDir, targetDirect);
 
-        if((angle > -0.001 && angle < 0.001)) return;
-
         std::lock_guard lock(cameraMotionMutex);
         cameraMotion               = std::make_optional<CameraMotion>();
         cameraMotion->rotateVector = roteteVector;
         cameraMotion->angle        = -angle;
         cameraMotion->progress     = 0;
+        if(newPositino.alignRotation) {
+            cameraMotion->postAlign = std::make_optional(targetDirect);
+        }
     }
 }
 
@@ -100,19 +101,45 @@ void Camera::motionTask()
 {
     using namespace std::chrono_literals;
     while(!exit) {
-        std::this_thread::sleep_for(20ms);
+        std::this_thread::sleep_for(10ms);
+        std::lock_guard lock(cameraMotionMutex);
         if(!cameraMotion) continue;
 
-        std::lock_guard lock(cameraMotionMutex);
-        glm::quat rotateQuat
-        = glm::angleAxis(cameraMotion->angle / 5, cameraMotion->rotateVector);
+        if((cameraMotion->angle < -0.0001 || cameraMotion->angle > 0.0001)) {
+            glm::quat rotateQuat = glm::angleAxis(
+            cameraMotion->angle / 10, cameraMotion->rotateVector);
 
-        this->rotation = rotateQuat * this->rotation;
-        this->updateView();
+            this->rotation = rotateQuat * this->rotation;
+            this->updateView();
+        }
 
-        cameraMotion->progress += 0.2;
+        cameraMotion->progress += 0.1;
         if(cameraMotion->progress >= 1.0) {
-            cameraMotion.reset();
+            if(!cameraMotion->postAlign) {
+                cameraMotion.reset();
+                continue;
+            }
+            cameraMotion->rotateVector = rotation * *cameraMotion->postAlign;
+            cameraMotion->progress     = 0;
+
+            glm::vec3 topDirect{0.f, 1.f, 0.f};
+            glm::mat3 xAxis{
+            {0, 1, 0},
+            {0, 0, 1},
+            {1, 0, 0}
+            };
+            glm::vec3 currentTopDir
+            = glm::normalize(rotation * (xAxis * *cameraMotion->postAlign));
+
+            float angle = std::atan2(
+            topDirect.y * currentTopDir.x - topDirect.x * currentTopDir.y,
+            topDirect.x * currentTopDir.x + topDirect.y * currentTopDir.y);
+
+            while(angle > (M_PI / 4.f)) angle -= (M_PI / 2.f);
+            while(angle < -(M_PI / 4.f)) angle += (M_PI / 2.f);
+
+            cameraMotion->angle = angle;
+            cameraMotion->postAlign.reset();
         }
     }
 }
