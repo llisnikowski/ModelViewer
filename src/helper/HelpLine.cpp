@@ -18,6 +18,18 @@ HelpLine::~HelpLine() = default;
 
 void HelpLine::draw()
 {
+    std::lock_guard lock{mutex};
+    if(newVec) {
+        struct VertexData
+        {
+            std::array<float, 3> pos;
+        };
+        VertexData vertices[]{
+        {{0, 0, 0}}, {{newVec->x / 2, newVec->y / 2, newVec->z / 2}}};
+        vbo->changeDate(vertices, sizeof(vertices));
+        newVec.reset();
+    }
+
     vao->bind();
 
     glLineWidth(4);
@@ -49,11 +61,7 @@ void HelpLine::initData()
 
 void HelpLine::setP2(glm::vec3 vec)
 {
-    struct VertexData
-    {
-        std::array<float, 3> pos;
-    };
+    std::lock_guard lock{mutex};
 
-    VertexData vertices[]{{{0, 0, 0}}, {{vec.x, vec.y, vec.z}}};
-    vbo->changeDate(vertices, sizeof(vertices));
+    newVec = std::make_optional(vec);
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include <array>
 #include <memory>
+#include <mutex>
+#include <optional>
 #include "glm/glm.hpp"
 #include "glm/vec3.hpp"
 
@@ -28,6 +30,10 @@ private:
     void initData();
 
     int lineCount{};
+
+    std::mutex mutex;
+
+    std::optional<glm::vec3> newVec;
 
     std::unique_ptr<llgl::VertexArray> vao;
     std::shared_ptr<llgl::VertexBuffer> vbo;
