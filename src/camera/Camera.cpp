@@ -1,6 +1,7 @@
 #include "Camera.hpp"
 
 #include <iostream>
+#include "glm/log.hpp"
 #include <cmath>
 #include "glm/gtx/vector_angle.hpp"
 
@@ -74,6 +75,12 @@ glm::quat Camera::getRotationQuad() const
     return rotation;
 }
 
+/*
+q0 = cos(fi/2)
+q1 = x * sin(fi/2)
+q2 = y * sin(fi/2)
+q3 = z * sin(fi/2)
+*/
 void Camera::setPosition(CameraPosition newPositino)
 {
     if(newPositino.rotation) {
@@ -91,7 +98,36 @@ void Camera::setPosition(CameraPosition newPositino)
         cameraMotion->angle        = -angle;
         cameraMotion->progress     = 0;
         if(newPositino.alignRotation) {
-            cameraMotion->postAlign = std::make_optional(targetDirect);
+            glm::quat preRot1
+            = glm::angleAxis(cameraMotion->angle, cameraMotion->rotateVector);
+            glm::quat preRot = preRot1 * this->rotation;
+
+            glm::vec3 topDirect{0.f, 1.f, 0.f};
+            glm::mat3 xAxis{
+            {0, 1, 0},
+            {0, 0, 1},
+            {1, 0, 0}
+            };
+            glm::vec3 currentTopDir
+            = glm::normalize(preRot * (xAxis * targetDirect));
+
+            float angle = std::atan2(
+            topDirect.y * currentTopDir.x - topDirect.x * currentTopDir.y,
+            topDirect.x * currentTopDir.x + topDirect.y * currentTopDir.y);
+
+            while(angle > (M_PI / 4.f)) angle -= (M_PI / 2.f);
+            while(angle < -(M_PI / 4.f)) angle += (M_PI / 2.f);
+
+            glm::quat postRot = glm::angleAxis(angle, (preRot * targetDirect));
+
+            glm::quat finalQuat
+            = (postRot * preRot) * glm::inverse(this->rotation);
+            float cosHalf              = finalQuat.w;
+            float quatAngle            = std::acos(cosHalf) * 2;
+            float sin                  = std::sin(quatAngle);
+            cameraMotion->angle        = quatAngle;
+            cameraMotion->rotateVector = glm::normalize(
+            glm::vec3(finalQuat.x / sin, finalQuat.y / sin, finalQuat.z / sin));
         }
     }
 }
@@ -115,31 +151,7 @@ void Camera::motionTask()
 
         cameraMotion->progress += 0.1;
         if(cameraMotion->progress >= 1.0) {
-            if(!cameraMotion->postAlign) {
-                cameraMotion.reset();
-                continue;
-            }
-            cameraMotion->rotateVector = rotation * *cameraMotion->postAlign;
-            cameraMotion->progress     = 0;
-
-            glm::vec3 topDirect{0.f, 1.f, 0.f};
-            glm::mat3 xAxis{
-            {0, 1, 0},
-            {0, 0, 1},
-            {1, 0, 0}
-            };
-            glm::vec3 currentTopDir
-            = glm::normalize(rotation * (xAxis * *cameraMotion->postAlign));
-
-            float angle = std::atan2(
-            topDirect.y * currentTopDir.x - topDirect.x * currentTopDir.y,
-            topDirect.x * currentTopDir.x + topDirect.y * currentTopDir.y);
-
-            while(angle > (M_PI / 4.f)) angle -= (M_PI / 2.f);
-            while(angle < -(M_PI / 4.f)) angle += (M_PI / 2.f);
-
-            cameraMotion->angle = angle;
-            cameraMotion->postAlign.reset();
+            cameraMotion.reset();
         }
     }
 }
