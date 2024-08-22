@@ -75,6 +75,30 @@ glm::quat Camera::getRotationQuad() const
     return rotation;
 }
 
+float Camera::getAngleXY(glm::vec3 lhs, glm::vec3 rhs)
+{
+    return std::atan2(
+    lhs.y * rhs.x - lhs.x * rhs.y, lhs.x * rhs.x + lhs.y * rhs.y);
+}
+
+float Camera::reductAngle(float angle, float max)
+{
+    while(angle > max / 2.f) angle -= max;
+    while(angle < -max / 2.f) angle += max;
+    return angle;
+}
+
+std::pair<glm::vec3, float> Camera::breakQuat(glm::quat quat)
+{
+    float cosHalf = quat.w;
+    float angle   = std::acos(cosHalf) * 2;
+    float sin     = std::sin(angle);
+    glm::vec3 vec
+    = glm::normalize(glm::vec3{quat.x / sin, quat.y / sin, quat.z / sin});
+
+    return std::pair<glm::vec3, float>{vec, angle};
+}
+
 /*
 q0 = cos(fi/2)
 q1 = x * sin(fi/2)
@@ -83,52 +107,48 @@ q3 = z * sin(fi/2)
 */
 void Camera::setPosition(CameraPosition newPositino)
 {
+    std::lock_guard lock(cameraMotionMutex);
+
+    glm::quat rot{1, 0, 0, 0};
+    static glm::vec3 defaultDirect{0.f, 0.f, 1.f};
+    static glm::vec3 topDirect{0.f, 1.f, 0.f};
+    glm::vec3 currentDirect = glm::inverse(rotation) * defaultDirect;
+
     if(newPositino.rotation) {
         glm::vec3 targetDirect = glm::normalize(*newPositino.rotation);
-        glm::vec3 defaultDirect{0.f, 0.f, 1.f};
-        glm::vec3 currentDir = glm::inverse(rotation) * defaultDirect;
 
         glm::vec3 roteteVector
-        = glm::normalize(rotation * glm::cross(currentDir, targetDirect));
-        auto angle = glm::angle(currentDir, targetDirect);
+        = glm::normalize(rotation * glm::cross(currentDirect, targetDirect));
+        auto angle = -glm::angle(currentDirect, targetDirect);
 
-        std::lock_guard lock(cameraMotionMutex);
-        cameraMotion               = std::make_optional<CameraMotion>();
-        cameraMotion->rotateVector = roteteVector;
-        cameraMotion->angle        = -angle;
-        cameraMotion->progress     = 0;
-        if(newPositino.alignRotation) {
-            glm::quat preRot1
-            = glm::angleAxis(cameraMotion->angle, cameraMotion->rotateVector);
-            glm::quat preRot = preRot1 * this->rotation;
+        rot = glm::angleAxis(angle, roteteVector);
+    }
+    if(newPositino.alignRotation) {
+        glm::vec3 targetDirect = newPositino.rotation
+                                 ? glm::normalize(*newPositino.rotation)
+                                 : currentDirect;
+        glm::quat preStepRot   = rot * this->rotation;
 
-            glm::vec3 topDirect{0.f, 1.f, 0.f};
-            glm::mat3 xAxis{
-            {0, 1, 0},
-            {0, 0, 1},
-            {1, 0, 0}
-            };
-            glm::vec3 currentTopDir
-            = glm::normalize(preRot * (xAxis * targetDirect));
+        glm::mat3 xAxis{
+        {0, 1, 0},
+        {0, 0, 1},
+        {1, 0, 0}
+        };
+        glm::vec3 currentTopDir
+        = glm::normalize(preStepRot * (xAxis * targetDirect));
 
-            float angle = std::atan2(
-            topDirect.y * currentTopDir.x - topDirect.x * currentTopDir.y,
-            topDirect.x * currentTopDir.x + topDirect.y * currentTopDir.y);
+        float angle = reductAngle(getAngleXY(topDirect, currentTopDir));
 
-            while(angle > (M_PI / 4.f)) angle -= (M_PI / 2.f);
-            while(angle < -(M_PI / 4.f)) angle += (M_PI / 2.f);
+        glm::quat finalRot = glm::angleAxis(angle, (preStepRot * targetDirect));
+        rot                = finalRot * rot;
+    }
 
-            glm::quat postRot = glm::angleAxis(angle, (preRot * targetDirect));
+    if(rot != glm::quat{1, 0, 0, 0}) {
+        cameraMotion = std::make_optional<CameraMotion>();
 
-            glm::quat finalQuat
-            = (postRot * preRot) * glm::inverse(this->rotation);
-            float cosHalf              = finalQuat.w;
-            float quatAngle            = std::acos(cosHalf) * 2;
-            float sin                  = std::sin(quatAngle);
-            cameraMotion->angle        = quatAngle;
-            cameraMotion->rotateVector = glm::normalize(
-            glm::vec3(finalQuat.x / sin, finalQuat.y / sin, finalQuat.z / sin));
-        }
+        auto [rotVec, rotAngle]    = breakQuat(rot);
+        cameraMotion->angle        = rotAngle;
+        cameraMotion->rotateVector = rotVec;
     }
 }
 

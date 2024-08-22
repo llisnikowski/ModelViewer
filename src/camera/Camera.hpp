@@ -33,6 +33,10 @@ private:
     void updateView();
     void motionTask();
 
+    float getAngleXY(glm::vec3 lhs, glm::vec3 rhs);
+    float reductAngle(float angle, float max = M_PI / 2.f);
+    std::pair<glm::vec3, float> breakQuat(glm::quat quat);
+
     glm::mat4 projection{};
     glm::quat rotation{1, 0, 0, 0};
     glm::vec3 position{0.f, 0.f, 4};

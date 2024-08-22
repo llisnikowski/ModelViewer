@@ -5,8 +5,8 @@
 
 struct CameraMotion
 {
-    glm::vec3 rotateVector;
-    float angle;
+    glm::vec3 rotateVector{};
+    float angle{};
 
     float progress{};
 };
