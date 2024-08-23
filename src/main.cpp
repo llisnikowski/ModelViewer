@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
     CameraManager::init();
 
     CameraManager::camera->setProjectonAspectRatio(
-    float(windowSize.width) / float(windowSize.height ? windowSize.height : 1));
+    float(windowSize.width), float(windowSize.height));
 
 
     Controller controller{};
@@ -102,13 +102,18 @@ int main(int argc, char* argv[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
+        glm::mat4 mvpRefCube
+        = CameraManager::camera->getProjectionOrtho()
+          * glm::translate(glm::mat4(1.f),
+          glm::vec3{windowSize.width - 100, windowSize.height - 100, 0})
+          * CameraManager::camera->getRotation()
+          * glm::scale(glm::mat4{1}, glm::vec3{60, 60, 60});
+
         glEnable(GL_DEPTH_TEST);
         {
             auto shader = shaderManager.getPicking();
             shader->bind();
-            shader->getUniform("mvp").setMat4(
-            CameraManager::camera->getProjection()
-            * CameraManager::camera->getView());
+            shader->getUniform("mvp").setMat4(mvpRefCube);
             picking->check(
             shader, mouseInfo.x, windowSize.height - mouseInfo.y - 1);
         }
@@ -119,8 +124,11 @@ int main(int argc, char* argv[])
             shader->getUniform("mvp").setMat4(
             CameraManager::camera->getProjection()
             * CameraManager::camera->getView());
+            model.draw(shader);
+
+
+            shader->getUniform("mvp").setMat4(mvpRefCube);
             refCube->draw(shader);
-            // model.draw(shader);
         }
 
         {
@@ -148,8 +156,7 @@ void resizeWindowCallback(GLFWwindow* window, int width, int height)
     windowSize.width  = width;
     windowSize.height = height;
 
-    CameraManager::camera->setProjectonAspectRatio(
-    float(width) / float(height ? height : 1));
+    CameraManager::camera->setProjectonAspectRatio(float(width), float(height));
 
     picking->setWindowSize(windowSize);
 }

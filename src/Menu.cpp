@@ -42,7 +42,7 @@ void Menu::drawNormal()
     }
 
     auto pos = CameraManager::camera->getPosition();
-    auto rot = CameraManager::camera->getRotation();
+    auto rot = CameraManager::camera->getRotationEuler();
 
     ImGui::Text("Position");
     ImGui::Text("[%.3f, %.3f, %.3f]", pos.x, pos.y, pos.z);

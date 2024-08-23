@@ -20,15 +20,25 @@ Camera::~Camera()
     motionTaskHandler.join();
 }
 
-void Camera::setProjectonAspectRatio(double aspect)
+void Camera::setProjectonAspectRatio(float width, float height)
 {
-    const double zNear = 1.0, zFar = 14.0, fov = 45.0;
+    if(height == 0) height = 1;
+    float aspect             = width / height;
+    static const float zNear = 1.0, zFar = 14.0, fov = 45.0;
+
     this->projection = glm::perspective(fov, aspect, zNear, zFar);
+    this->projectionOrtho
+    = glm::ortho(0.f, width, 0.f, height, -width / 2, width / 2);
 }
 
 const glm::mat4 &Camera::getProjection() const
 {
     return this->projection;
+}
+
+const glm::mat4 &Camera::getProjectionOrtho() const
+{
+    return this->projectionOrtho;
 }
 
 void Camera::rotate(glm::vec3 axis, double angle)
@@ -65,7 +75,12 @@ glm::vec3 Camera::getPosition() const
     return position;
 }
 
-glm::vec3 Camera::getRotation() const
+glm::mat4 Camera::getRotation() const
+{
+    return static_cast<glm::mat4>(rotation);
+}
+
+glm::vec3 Camera::getRotationEuler() const
 {
     return glm::eulerAngles(rotation) * 180.f / 3.14159f;
 }
