@@ -14,6 +14,7 @@ private:
 public:
     void setBool(bool value) const;
     void setInt(int value) const;
+    void setUInt(unsigned int value) const;
     void setFloat(float value) const;
     void setVec2(const glm::vec2 &value) const;
     void setVec2(float x, float y) const;

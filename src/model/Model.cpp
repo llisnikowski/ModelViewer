@@ -5,29 +5,22 @@
 #include "llgl/VertexArray.hpp"
 #include "llgl/VertexBuffer.hpp"
 #include "llgl/ElementBuffer.hpp"
-#include "llgl/Shader.hpp"
 #include "llgl/ShaderProgram.hpp"
 #include "llgl/Uniform.hpp"
 #include <iostream>
-#include "Camera.hpp"
-#include "ShadersTemplate.hpp"
-#include "ExampleData.hpp"
+#include "dataTemplates/ExampleData.hpp"
 
 
-Model::Model(Camera &camera)
-: camera{camera}
+Model::Model()
 {
     init();
 }
 
 Model::~Model() = default;
 
-void Model::draw()
+void Model::draw(std::shared_ptr<llgl::ShaderProgram> program)
 {
     vao->bind();
-    program->bind();
-    program->getUniform("mvp").setMat4(
-    camera.getProjection() * camera.getView());
 
     ebo->bind();
     program->getUniform("color").setVec3(0.5f, 0.8f, 0.4f);
@@ -38,12 +31,9 @@ void Model::draw()
     glDrawElements(GL_LINES, edgeCount, GL_UNSIGNED_SHORT, nullptr);
 }
 
-void loadShader() {}
-
 void Model::init()
 {
     initData();
-    initProgram();
 }
 
 void Model::initData()
@@ -65,22 +55,4 @@ void Model::initData()
 
     vaoEdge = std::make_unique<llgl::VertexArray>();
     vaoEdge->setAttrib<float>(0, 3, 3 * sizeof(float), 0, *vbo);
-}
-
-void Model::initProgram()
-{
-    try {
-        vertexShader
-        = std::make_shared<llgl::Shader>(simpleVS, llgl::Shader::Type::VERTEX);
-        fragmentShader = std::make_shared<llgl::Shader>(
-        simpleFS, llgl::Shader::Type::FRAGMENT);
-    }
-    catch(std::invalid_argument &ex) {
-        std::cout << ex.what() << std::endl;
-    }
-
-    program = std::make_unique<llgl::ShaderProgram>();
-    program->addShader(*vertexShader);
-    program->addShader(*fragmentShader);
-    program->link();
 }

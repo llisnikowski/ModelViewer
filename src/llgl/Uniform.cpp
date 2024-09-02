@@ -20,6 +20,11 @@ void Uniform::setInt(int value) const
     glUniform1i(this->id, value);
 }
 
+void Uniform::setUInt(unsigned int value) const
+{
+    glUniform1ui(this->id, value);
+}
+
 void Uniform::setFloat(float value) const
 {
     glUniform1f(this->id, value);
