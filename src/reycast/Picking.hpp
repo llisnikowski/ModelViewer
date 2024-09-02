@@ -5,6 +5,7 @@
 
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
+#include "glm/glm.hpp"
 
 namespace llgl
 {
@@ -26,20 +27,6 @@ public:
 class Picking
 {
 public:
-    Picking(llgl::Size size);
-    ~Picking();
-
-    void setWindowSize(llgl::Size size);
-
-
-    void addObject(PickingObject *object);
-    void check(std::shared_ptr<llgl::ShaderProgram> program, unsigned int x,
-    unsigned int y);
-
-
-    void enableWriting();
-    void disableWriting();
-
     struct PixelInfo
     {
         unsigned int objectID = 0;
@@ -47,14 +34,30 @@ public:
         unsigned int primID   = 0;
     };
 
+    Picking(llgl::Size size);
+    ~Picking();
+
+    void setWindowSize(llgl::Size size);
+
+
+    void startCheck(std::shared_ptr<llgl::ShaderProgram> program);
+    void drawObject(int nr, PickingObject *object, glm::mat4 mvp);
+    PixelInfo endCheck(unsigned int x, unsigned int y);
+
+
+    void enableWriting();
+    void disableWriting();
+
+
     PixelInfo getPixel(unsigned int x, unsigned int y);
 
 private:
+
+
     GLuint frameBuffor    = 0;
     GLuint pickingTexture = 0;
     GLuint depthTexture   = 0;
 
-    PickingObject *lastPickingObject{};
     std::vector<PickingObject *> objects;
     std::shared_ptr<llgl::ShaderProgram> shaderProgram;
 };

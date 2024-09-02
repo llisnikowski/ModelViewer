@@ -1,7 +1,5 @@
 #include "MainAxis.hpp"
 
-#include <memory>
-
 #include "llgl/VertexArray.hpp"
 #include "llgl/VertexBuffer.hpp"
 #include <iostream>

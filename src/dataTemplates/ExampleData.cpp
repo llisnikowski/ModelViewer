@@ -64,3 +64,13 @@ unsigned short edgeIndices[]{// front
 // bottom
 0 + 4 * 5, 1 + 4 * 5, 1 + 4 * 5, 2 + 4 * 5, 2 + 4 * 5, 3 + 4 * 5, 3 + 4 * 5,
 0 + 4 * 5};
+
+
+VertexData squareVertices[]{
+{-0.5f,  0.5f, 0.f},
+{ 0.5f,  0.5f, 0.f},
+{ 0.5f, -0.5f, 0.f},
+{-0.5f, -0.5f, 0.f}
+};
+
+unsigned short squareIndices[]{0, 1, 2, 2, 3, 0};

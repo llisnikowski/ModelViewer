@@ -20,6 +20,7 @@
 #include "Menu.hpp"
 #include "reference/MainAxis.hpp"
 #include "reference/RefCube.hpp"
+#include "reference/NaviIcons.hpp"
 
 #include "reycast/Picking.hpp"
 
@@ -45,6 +46,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
 std::unique_ptr<RefCube> refCube;
+std::unique_ptr<NaviIcons> naviIcons;
 std::unique_ptr<Picking> picking;
 
 int main(int argc, char* argv[])
@@ -76,15 +78,17 @@ int main(int argc, char* argv[])
     Model model;
 
     MainAxis mainAxis;
-    refCube = std::make_unique<RefCube>(*CameraManager::camera);
+    refCube   = std::make_unique<RefCube>(*CameraManager::camera);
+    naviIcons = std::make_unique<NaviIcons>(*CameraManager::camera);
 
-    picking->addObject(refCube.get());
 
     glfwSetFramebufferSizeCallback(llgl->getWindow(), resizeWindowCallback);
 
     glfwSetCursorPosCallback(llgl->getWindow(), cursorPositionCallback);
     glfwSetMouseButtonCallback(llgl->getWindow(), mouseButtonCallback);
     glfwSetScrollCallback(llgl->getWindow(), scrollCallback);
+
+    PickingObject* lastPickingObject{};
 
     while(glfwWindowShouldClose(llgl->getWindow()) == 0) {
         glfwPollEvents();
@@ -109,26 +113,64 @@ int main(int argc, char* argv[])
           * CameraManager::camera->getRotation()
           * glm::scale(glm::mat4{1}, glm::vec3{60, 60, 60});
 
+        glm::mat4 mvpNaviIcons
+        = CameraManager::camera->getProjectionOrtho()
+          * glm::translate(glm::mat4(1.f),
+          glm::vec3{windowSize.width - 150, windowSize.height - 150, 0})
+          * glm::scale(glm::mat4{1}, glm::vec3{20, 20, 20});
+
         glEnable(GL_DEPTH_TEST);
         {
             auto shader = shaderManager.getPicking();
-            shader->bind();
-            shader->getUniform("mvp").setMat4(mvpRefCube);
-            picking->check(
-            shader, mouseInfo.x, windowSize.height - mouseInfo.y - 1);
+            picking->startCheck(shader);
+            picking->drawObject(1, refCube.get(), mvpRefCube);
+            picking->drawObject(2, naviIcons.get(), mvpNaviIcons);
+            Picking::PixelInfo pixel = picking->endCheck(
+            mouseInfo.x, windowSize.height - mouseInfo.y - 1);
+
+            PickingObject* pickingObject{};
+            switch(pixel.objectID) {
+            case 1: pickingObject = refCube.get(); break;
+            case 2: pickingObject = naviIcons.get(); break;
+            case 0:
+            [[likely]]
+            default:
+                break;
+            }
+
+            if(pickingObject) {
+                pickingObject->mouseEntered(pixel.primID);
+                if(lastPickingObject && pickingObject != lastPickingObject) {
+                    lastPickingObject->mouseExited();
+                }
+                lastPickingObject = pickingObject;
+            }
+            else if(lastPickingObject) {
+                lastPickingObject->mouseExited();
+                lastPickingObject = nullptr;
+            }
         }
 
         {
             auto shader = shaderManager.getSimple();
             shader->bind();
+
             shader->getUniform("mvp").setMat4(
             CameraManager::camera->getProjection()
             * CameraManager::camera->getView());
             model.draw(shader);
 
-
             shader->getUniform("mvp").setMat4(mvpRefCube);
             refCube->draw(shader);
+        }
+
+
+        {
+            auto shader = shaderManager.getSimple();
+            shader->bind();
+            shader->getUniform("mvp").setMat4(mvpNaviIcons);
+
+            naviIcons->draw(shader);
         }
 
         {
@@ -214,4 +256,5 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 void rightButtonClickCallback()
 {
     refCube->click();
+    naviIcons->click();
 }

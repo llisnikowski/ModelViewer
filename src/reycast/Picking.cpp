@@ -80,48 +80,31 @@ void Picking::disableWriting()
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
-
-void Picking::addObject(PickingObject *object)
+void Picking::startCheck(std::shared_ptr<llgl::ShaderProgram> program)
 {
-    objects.push_back(object);
-}
-
-void Picking::check(
-std::shared_ptr<llgl::ShaderProgram> program, unsigned int x, unsigned int y)
-{
+    shaderProgram = program;
+    shaderProgram->bind();
     enableWriting();
     glEnable(GL_DEPTH_TEST);
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    for(unsigned int i = 0; i < objects.size(); i++) {
-        program->getUniform("gObjectIndex").setUInt(i + 1);
-        program->getUniform("gDrawIndex").setUInt(1);
-        objects[i]->drawPicking();
-    }
-
-    disableWriting();
-
-    PixelInfo pixel = getPixel(x, y);
-
-    if(pixel.objectID != 0) {
-        // printf("Pixel [%d, %d, %d]\n",
-        //     pixel.objectID, pixel.drawID, pixel.primID);
-        objects[pixel.objectID - 1]->mouseEntered(pixel.primID);
-        if(lastPickingObject
-           && objects[pixel.objectID - 1] != lastPickingObject)
-        {
-            lastPickingObject->mouseExited();
-        }
-        lastPickingObject = objects[pixel.objectID - 1];
-    }
-    else if(lastPickingObject) {
-        lastPickingObject->mouseExited();
-        lastPickingObject = nullptr;
-    }
 }
 
+void Picking::drawObject(int nr, PickingObject *object, glm::mat4 mvp)
+{
+    shaderProgram->getUniform("mvp").setMat4(mvp);
+    shaderProgram->getUniform("gObjectIndex").setUInt(nr);
+    shaderProgram->getUniform("gDrawIndex").setUInt(1);
+    object->drawPicking();
+}
+
+Picking::PixelInfo Picking::endCheck(unsigned int x, unsigned int y)
+{
+    disableWriting();
+    PixelInfo pixel = getPixel(x, y);
+    return pixel;
+}
 
 Picking::PixelInfo Picking::getPixel(unsigned int x, unsigned int y)
 {
