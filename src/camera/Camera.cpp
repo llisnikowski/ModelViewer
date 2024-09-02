@@ -129,6 +129,11 @@ void Camera::setPosition(CameraPosition newPositino)
     static glm::vec3 topDirect{0.f, 1.f, 0.f};
     glm::vec3 currentDirect = glm::inverse(rotation) * defaultDirect;
 
+    if(newPositino.axisRotation) {
+        glm::quat finalRot
+        = glm::angleAxis(*newPositino.axisRotation, defaultDirect);
+        rot = finalRot * rot;
+    }
     if(newPositino.rotation) {
         glm::vec3 targetDirect = glm::normalize(*newPositino.rotation);
 
@@ -136,7 +141,8 @@ void Camera::setPosition(CameraPosition newPositino)
         = glm::normalize(rotation * glm::cross(currentDirect, targetDirect));
         auto angle = -glm::angle(currentDirect, targetDirect);
 
-        rot = glm::angleAxis(angle, roteteVector);
+        glm::quat finalRot = glm::angleAxis(angle, roteteVector);
+        rot                = finalRot * rot;
     }
     if(newPositino.alignRotation) {
         glm::vec3 targetDirect = newPositino.rotation

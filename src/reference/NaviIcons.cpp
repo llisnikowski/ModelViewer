@@ -15,8 +15,8 @@
 #include "camera/Camera.hpp"
 #include "camera/CameraPosition.hpp"
 
-NaviIcons::NaviIcons(Camera &camera)
-: camera{camera}
+NaviIcons::NaviIcons(Func func)
+: func{func}
 {
     init();
 }
@@ -61,12 +61,7 @@ void NaviIcons::click()
 {
     if(!this->mouseState.mouseEnter) return;
 
-    glm::vec3 pos{-0.6f, 0.3f, 1.f};
-
-
-    CameraPosition newPositino;
-    newPositino.setRotation(pos);
-    camera.setPosition(newPositino);
+    if(func) func();
 }
 
 

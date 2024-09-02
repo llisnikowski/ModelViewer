@@ -15,6 +15,7 @@
 #include "model/Model.hpp"
 
 #include "CameraManager.hpp"
+#include "camera/CameraPosition.hpp"
 
 #include "Controller.hpp"
 #include "Menu.hpp"
@@ -46,7 +47,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
 std::unique_ptr<RefCube> refCube;
-std::unique_ptr<NaviIcons> naviIcons;
+std::array<std::unique_ptr<NaviIcons>, 2> naviIcons; // left, right
 std::unique_ptr<Picking> picking;
 
 int main(int argc, char* argv[])
@@ -78,8 +79,21 @@ int main(int argc, char* argv[])
     Model model;
 
     MainAxis mainAxis;
-    refCube   = std::make_unique<RefCube>(*CameraManager::camera);
-    naviIcons = std::make_unique<NaviIcons>(*CameraManager::camera);
+    refCube      = std::make_unique<RefCube>(*CameraManager::camera);
+    naviIcons[0] = std::make_unique<NaviIcons>([] {
+        glm::vec3 pos{-0.6f, 0.3f, 1.f};
+
+        CameraPosition newPositino;
+        newPositino.setAxisRotation(-M_PI / 2);
+        CameraManager::camera->setPosition(newPositino);
+    });
+    naviIcons[1] = std::make_unique<NaviIcons>([] {
+        glm::vec3 pos{-0.6f, 0.3f, 1.f};
+
+        CameraPosition newPositino;
+        newPositino.setAxisRotation(M_PI / 2);
+        CameraManager::camera->setPosition(newPositino);
+    });
 
 
     glfwSetFramebufferSizeCallback(llgl->getWindow(), resizeWindowCallback);
@@ -113,25 +127,38 @@ int main(int argc, char* argv[])
           * CameraManager::camera->getRotation()
           * glm::scale(glm::mat4{1}, glm::vec3{60, 60, 60});
 
-        glm::mat4 mvpNaviIcons
-        = CameraManager::camera->getProjectionOrtho()
-          * glm::translate(glm::mat4(1.f),
-          glm::vec3{windowSize.width - 150, windowSize.height - 150, 0})
-          * glm::scale(glm::mat4{1}, glm::vec3{20, 20, 20});
+        std::array<glm::vec3, 2> naviIconsPosition{
+        glm::vec3{ windowSize.width - 50, windowSize.height - 50, 0},
+        glm::vec3{windowSize.width - 150, windowSize.height - 50, 0}
+        };
+
+        std::array<glm::mat4, 2> mvpNaviIcons;
+        for(int i = 0; i < 2; i++) {
+            mvpNaviIcons[i]
+            = CameraManager::camera->getProjectionOrtho()
+              * glm::translate(glm::mat4(1.f), naviIconsPosition[i])
+              * glm::scale(glm::mat4{1}, glm::vec3{20, 20, 20});
+        }
 
         glEnable(GL_DEPTH_TEST);
         {
             auto shader = shaderManager.getPicking();
             picking->startCheck(shader);
             picking->drawObject(1, refCube.get(), mvpRefCube);
-            picking->drawObject(2, naviIcons.get(), mvpNaviIcons);
+            for(int i = 0; i < 2; i++) {
+                picking->drawObject(2 + i, naviIcons[i].get(), mvpNaviIcons[i]);
+            }
             Picking::PixelInfo pixel = picking->endCheck(
             mouseInfo.x, windowSize.height - mouseInfo.y - 1);
 
             PickingObject* pickingObject{};
             switch(pixel.objectID) {
             case 1: pickingObject = refCube.get(); break;
-            case 2: pickingObject = naviIcons.get(); break;
+            case 2 + 0: pickingObject = naviIcons[0].get(); break;
+            case 2 + 1:
+                pickingObject = naviIcons[1].get();
+                break;
+                break;
             case 0:
             [[likely]]
             default:
@@ -168,9 +195,12 @@ int main(int argc, char* argv[])
         {
             auto shader = shaderManager.getSimple();
             shader->bind();
-            shader->getUniform("mvp").setMat4(mvpNaviIcons);
 
-            naviIcons->draw(shader);
+            for(int i = 0; i < 2; i++) {
+                shader->getUniform("mvp").setMat4(mvpNaviIcons[i]);
+
+                naviIcons[i]->draw(shader);
+            }
         }
 
         {
@@ -256,5 +286,7 @@ void scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 void rightButtonClickCallback()
 {
     refCube->click();
-    naviIcons->click();
+    for(int i = 0; i < 2; i++) {
+        naviIcons[i]->click();
+    }
 }

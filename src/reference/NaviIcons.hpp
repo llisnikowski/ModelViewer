@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "reycast/Picking.hpp"
+#include <functional>
 
 
 namespace llgl
@@ -16,7 +17,8 @@ class Camera;
 class NaviIcons : public PickingObject
 {
 public:
-    NaviIcons(Camera &camera);
+    using Func = std::function<void()>;
+    NaviIcons(Func func);
     ~NaviIcons();
 
     void draw(std::shared_ptr<llgl::ShaderProgram> program);
@@ -42,5 +44,5 @@ private:
     std::shared_ptr<llgl::VertexBuffer> vbo;
     std::shared_ptr<llgl::ElementBuffer> ebo;
 
-    Camera &camera;
+    Func func;
 };
