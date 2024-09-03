@@ -1,4 +1,4 @@
-#include "Model.hpp"
+#include "SimpleCube.hpp"
 
 #include <memory>
 
@@ -11,14 +11,14 @@
 #include "dataTemplates/ExampleData.hpp"
 
 
-Model::Model()
+SimpleCube::SimpleCube()
 {
     init();
 }
 
-Model::~Model() = default;
+SimpleCube::~SimpleCube() = default;
 
-void Model::draw(std::shared_ptr<llgl::ShaderProgram> program)
+void SimpleCube::draw(std::shared_ptr<llgl::ShaderProgram> program)
 {
     vao->bind();
 
@@ -31,12 +31,12 @@ void Model::draw(std::shared_ptr<llgl::ShaderProgram> program)
     glDrawElements(GL_LINES, edgeCount, GL_UNSIGNED_SHORT, nullptr);
 }
 
-void Model::init()
+void SimpleCube::init()
 {
     initData();
 }
 
-void Model::initData()
+void SimpleCube::initData()
 {
     vbo = std::make_shared<llgl::VertexBuffer>();
     vbo->allocate(cubeVertices, sizeof(cubeVertices));

@@ -10,11 +10,11 @@ class ElementBuffer;
 class ShaderProgram;
 }
 
-class Model
+class SimpleCube
 {
 public:
-    explicit Model();
-    ~Model();
+    explicit SimpleCube();
+    ~SimpleCube();
 
     void draw(std::shared_ptr<llgl::ShaderProgram> program);
 

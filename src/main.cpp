@@ -12,7 +12,7 @@
 #include <llgl/ImguiSetup.hpp>
 #include "llgl/ShaderProgram.hpp"
 #include "llgl/Uniform.hpp"
-#include "model/Model.hpp"
+#include "model/SimpleCube.hpp"
 
 #include "CameraManager.hpp"
 #include "camera/CameraPosition.hpp"
@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
     picking = std::make_unique<Picking>(
     llgl::Size{windowSize.width, windowSize.height});
 
-    Model model;
+    SimpleCube simplecube;
 
     MainAxis mainAxis;
     refCube      = std::make_unique<RefCube>(*CameraManager::camera);
@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
             shader->getUniform("mvp").setMat4(
             CameraManager::camera->getProjection()
             * CameraManager::camera->getView());
-            model.draw(shader);
+            simplecube.draw(shader);
 
             shader->getUniform("mvp").setMat4(mvpRefCube);
             refCube->draw(shader);
