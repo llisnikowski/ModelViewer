@@ -5,6 +5,7 @@ project(cad)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
+find_package(assimp REQUIRED)
 
 
 include(cmake/lib-imgui.cmake)
@@ -33,4 +34,5 @@ PRIVATE
     imgui::imgui
     glad::glad
     glm::glm
+    assimp::assimp
 )
