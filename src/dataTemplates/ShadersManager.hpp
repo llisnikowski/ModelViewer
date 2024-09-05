@@ -39,6 +39,19 @@ Shaders:
         -vec3 gDrawIndex
 */
 
+/*
+Shaders:
+-mesh:
+    -data:
+        -vec3 pos
+        -vec3 normal
+    -uniforms:
+        -mat4 model
+        -vec3 view
+        -vec3 projection
+        -vec3 color
+*/
+
 class ShaderManager
 {
 public:
@@ -51,11 +64,14 @@ public:
     std::shared_ptr<llgl::ShaderProgram> getSimpleColor();
     void usePicking();
     std::shared_ptr<llgl::ShaderProgram> getPicking();
+    void useMesh();
+    std::shared_ptr<llgl::ShaderProgram> getMesh();
 
 private:
     std::unique_ptr<llgl::Shader> simpleVso;
     std::unique_ptr<llgl::Shader> simpleColorVso;
     std::unique_ptr<llgl::Shader> pickingVso;
+    std::unique_ptr<llgl::Shader> meshVso;
 
     std::unique_ptr<llgl::Shader> simpleFso;
     std::unique_ptr<llgl::Shader> simpleColorFso;
@@ -64,4 +80,5 @@ private:
     std::shared_ptr<llgl::ShaderProgram> simple;
     std::shared_ptr<llgl::ShaderProgram> simpleColor;
     std::shared_ptr<llgl::ShaderProgram> picking;
+    std::shared_ptr<llgl::ShaderProgram> mesh;
 };

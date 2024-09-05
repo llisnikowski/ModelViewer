@@ -10,3 +10,5 @@ extern const char* colorFs;
 
 extern const char* pickingVs;
 extern const char* pickingFs;
+
+extern const char* meshVs;
