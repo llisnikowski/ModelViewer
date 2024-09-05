@@ -13,6 +13,7 @@
 #include "llgl/ShaderProgram.hpp"
 #include "llgl/Uniform.hpp"
 #include "model/SimpleCube.hpp"
+#include "model/Model.hpp"
 
 #include "CameraManager.hpp"
 #include "camera/CameraPosition.hpp"
@@ -104,6 +105,8 @@ int main(int argc, char* argv[])
 
     PickingObject* lastPickingObject{};
 
+    Model model{"models/3DBenchy.stl"};
+
     while(glfwWindowShouldClose(llgl->getWindow()) == 0) {
         glfwPollEvents();
 
@@ -182,13 +185,28 @@ int main(int argc, char* argv[])
             auto shader = shaderManager.getSimple();
             shader->bind();
 
-            shader->getUniform("mvp").setMat4(
-            CameraManager::camera->getProjection()
-            * CameraManager::camera->getView());
-            simplecube.draw(shader);
+            // shader->getUniform("mvp").setMat4(
+            // CameraManager::camera->getProjection()
+            // * CameraManager::camera->getView());
+            // simplecube.draw(shader);
 
             shader->getUniform("mvp").setMat4(mvpRefCube);
             refCube->draw(shader);
+        }
+
+
+        glEnable(GL_DEPTH_TEST);
+        {
+            auto shader = shaderManager.getMesh();
+            shader->bind();
+
+            shader->getUniform("model").setMat4(
+            glm::scale(glm::mat4{1}, glm::vec3{0.02f, 0.02f, 0.02f}));
+            shader->getUniform("view").setMat4(
+            CameraManager::camera->getView());
+            shader->getUniform("projection")
+            .setMat4(CameraManager::camera->getProjection());
+            model.draw(shader);
         }
 
 
