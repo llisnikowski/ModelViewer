@@ -17,3 +17,10 @@ void Model::draw(std::shared_ptr<llgl::ShaderProgram> program)
         meshes[i].draw(program);
     }
 }
+
+void Model::drawBorder(std::shared_ptr<llgl::ShaderProgram> program)
+{
+    for(unsigned int i = 0; i < meshes.size(); i++) {
+        meshes[i].drawBorder(program);
+    }
+}

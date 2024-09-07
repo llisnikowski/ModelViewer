@@ -208,6 +208,16 @@ int main(int argc, char* argv[])
             .setMat4(CameraManager::camera->getProjection());
             model.draw(shader);
         }
+        {
+            auto shader = shaderManager.getSimple();
+            shader->bind();
+
+            shader->getUniform("mvp").setMat4(
+            CameraManager::camera->getProjection()
+            * CameraManager::camera->getView()
+            * glm::scale(glm::mat4{1}, glm::vec3{0.05f, 0.05f, 0.05f}));
+            model.drawBorder(shader);
+        }
 
 
         {

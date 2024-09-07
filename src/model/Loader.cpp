@@ -46,9 +46,15 @@ Mesh Loader::processMesh(aiMesh *mesh, const aiScene *scene)
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
+    Border border;
+    if(mesh->mNumVertices > 0) {
+        border.setFirstPoint(toGlmVec3(mesh->mVertices[0]));
+    }
+
     for(unsigned int i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex;
         vertex.Position = toGlmVec3(mesh->mVertices[i]);
+        border.addPoint(vertex.Position);
 
         // normals
         if(mesh->HasNormals()) {
@@ -66,7 +72,7 @@ Mesh Loader::processMesh(aiMesh *mesh, const aiScene *scene)
     // process material
     // todo
 
-    return Mesh(vertices, indices);
+    return Mesh(vertices, indices, border);
 }
 
 glm::vec3 Loader::toGlmVec3(aiVector3D vec)
