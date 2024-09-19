@@ -1,11 +1,11 @@
 #include "Model.hpp"
 
 #include "Loader.hpp"
-
+#include "LoaderPostprocess.hpp"
 
 Model::Model(const char *path)
 {
-    Loader loader(path);
+    Loader loader(path, std::make_unique<LoaderPostprocess>());
     meshes = std::move(loader.getMesh());
 }
 

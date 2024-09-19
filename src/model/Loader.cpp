@@ -8,7 +8,8 @@
 #include <stb_image.h>
 
 
-Loader::Loader(std::string path)
+Loader::Loader(std::string path, std::unique_ptr<Postprocess> &&postprocess)
+: postprocess{std::move(postprocess)}
 {
     Assimp::Importer import;
     const aiScene *scene = import.ReadFile(
@@ -33,28 +34,25 @@ std::vector<Mesh> &Loader::getMesh()
 void Loader::processNode(aiNode *node, const aiScene *scene)
 {
     for(unsigned int i = 0; i < node->mNumMeshes; i++) {
-        aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-        meshes.push_back(processMesh(mesh, scene));
+        aiMesh *mesh             = scene->mMeshes[node->mMeshes[i]];
+        auto [vertices, indices] = processMesh(mesh);
+        if(postprocess) {
+            meshes.push_back(postprocess->convert(vertices, indices));
+        }
     }
     for(unsigned int i = 0; i < node->mNumChildren; i++) {
         processNode(node->mChildren[i], scene);
     }
 }
 
-Mesh Loader::processMesh(aiMesh *mesh, const aiScene *scene)
+auto Loader::processMesh(aiMesh *mesh) -> std::pair<Vertices, Indices>
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
-    Border border;
-    if(mesh->mNumVertices > 0) {
-        border.setFirstPoint(toGlmVec3(mesh->mVertices[0]));
-    }
-
     for(unsigned int i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex;
         vertex.Position = toGlmVec3(mesh->mVertices[i]);
-        border.addPoint(vertex.Position);
 
         // normals
         if(mesh->HasNormals()) {
@@ -72,9 +70,7 @@ Mesh Loader::processMesh(aiMesh *mesh, const aiScene *scene)
     // process material
     // todo
 
-
-    auto [verOpt, indOpt] = getOptimalize(vertices, indices);
-    return Mesh(vertices, indices, verOpt, indOpt, border);
+    return {vertices, indices};
 }
 
 glm::vec3 Loader::toGlmVec3(aiVector3D vec)
@@ -84,22 +80,4 @@ glm::vec3 Loader::toGlmVec3(aiVector3D vec)
     vector.y = vec.y;
     vector.z = vec.z;
     return vector;
-}
-
-auto Loader::getOptimalize(
-Vertices vertices, Indices indices) -> std::pair<VerticesOpt, Indices>
-{
-    VerticesOpt verticesOpt;
-    Indices indicesOpt;
-    for(Index index: indices) {
-        Position pos = vertices[index].Position;
-        auto itPos   = std::find(verticesOpt.begin(), verticesOpt.end(), pos);
-        if(itPos == verticesOpt.end()) {
-            verticesOpt.push_back(pos);
-            indicesOpt.push_back(index);
-            continue;
-        }
-        indicesOpt.push_back(itPos - verticesOpt.begin());
-    }
-    return {verticesOpt, indicesOpt};
 }
