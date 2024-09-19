@@ -19,15 +19,14 @@ HelpLine::~HelpLine() = default;
 void HelpLine::draw()
 {
     std::lock_guard lock{mutex};
-    if(newVec) {
+    if(changeLine) {
         struct VertexData
         {
             std::array<float, 3> pos;
         };
-        VertexData vertices[]{
-        {{0, 0, 0}}, {{newVec->x / 2, newVec->y / 2, newVec->z / 2}}};
+        VertexData vertices[]{{{p1.x, p1.y, p1.z}}, {{p2.x, p2.y, p2.z}}};
         vbo->changeDate(vertices, sizeof(vertices));
-        newVec.reset();
+        changeLine = false;
     }
 
     vao->bind();
@@ -59,9 +58,18 @@ void HelpLine::initData()
     vao->setAttrib<float>(0, 3, 3 * sizeof(float), 0, *vbo);
 }
 
+void HelpLine::setP1(glm::vec3 vec)
+{
+    std::lock_guard lock{mutex};
+
+    changeLine = true;
+    p1         = vec;
+}
+
 void HelpLine::setP2(glm::vec3 vec)
 {
     std::lock_guard lock{mutex};
 
-    newVec = std::make_optional(vec);
+    changeLine = true;
+    p2         = vec;
 }

@@ -22,6 +22,7 @@ public:
 
     void draw();
 
+    void setP1(glm::vec3 vec);
     void setP2(glm::vec3 vec);
 
 private:
@@ -33,7 +34,9 @@ private:
 
     std::mutex mutex;
 
-    std::optional<glm::vec3> newVec;
+    bool changeLine{};
+    glm::vec3 p1{0, 0, 0};
+    glm::vec3 p2{1, 0, 0};
 
     std::unique_ptr<llgl::VertexArray> vao;
     std::shared_ptr<llgl::VertexBuffer> vbo;
