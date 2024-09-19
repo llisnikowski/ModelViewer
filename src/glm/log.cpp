@@ -1,6 +1,12 @@
 #include "log.hpp"
 
 
+std::ostream& operator<<(std::ostream& os, const glm::vec4& vec)
+{
+    return os << "vec4[" << vec.x << "; " << vec.y << "; " << vec.z << "; "
+              << vec.w << "]";
+}
+
 std::ostream& operator<<(std::ostream& os, const glm::vec3& vec)
 {
     return os << "vec3[" << vec.x << "; " << vec.y << "; " << vec.z << "]";
