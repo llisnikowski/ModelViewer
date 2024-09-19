@@ -11,8 +11,8 @@
 Loader::Loader(std::string path)
 {
     Assimp::Importer import;
-    const aiScene *scene
-    = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene *scene = import.ReadFile(
+    path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -72,7 +72,9 @@ Mesh Loader::processMesh(aiMesh *mesh, const aiScene *scene)
     // process material
     // todo
 
-    return Mesh(vertices, indices, border);
+
+    auto [verOpt, indOpt] = getOptimalize(vertices, indices);
+    return Mesh(vertices, indices, verOpt, indOpt, border);
 }
 
 glm::vec3 Loader::toGlmVec3(aiVector3D vec)
@@ -82,4 +84,22 @@ glm::vec3 Loader::toGlmVec3(aiVector3D vec)
     vector.y = vec.y;
     vector.z = vec.z;
     return vector;
+}
+
+auto Loader::getOptimalize(
+Vertices vertices, Indices indices) -> std::pair<VerticesOpt, Indices>
+{
+    VerticesOpt verticesOpt;
+    Indices indicesOpt;
+    for(Index index: indices) {
+        Position pos = vertices[index].Position;
+        auto itPos   = std::find(verticesOpt.begin(), verticesOpt.end(), pos);
+        if(itPos == verticesOpt.end()) {
+            verticesOpt.push_back(pos);
+            indicesOpt.push_back(index);
+            continue;
+        }
+        indicesOpt.push_back(itPos - verticesOpt.begin());
+    }
+    return {verticesOpt, indicesOpt};
 }

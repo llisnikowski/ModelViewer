@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <utility>
 
 #include "glm/glm.hpp"
 
@@ -14,6 +15,12 @@
 class Loader
 {
 public:
+    using Index       = unsigned int;
+    using Indices     = std::vector<Index>;
+    using Vertices    = std::vector<Vertex>;
+    using Position    = glm::vec3;
+    using VerticesOpt = std::vector<Position>;
+
     Loader(std::string path);
     ~Loader();
 
@@ -22,6 +29,9 @@ public:
 private:
     void processNode(aiNode *node, const aiScene *scene);
     Mesh processMesh(aiMesh *mesh, const aiScene *scene);
+
+    std::pair<VerticesOpt, Indices> getOptimalize(
+    Vertices vertices, Indices indices);
 
     glm::vec3 toGlmVec3(aiVector3D vec);
 
