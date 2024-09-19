@@ -1,5 +1,6 @@
 #include "Mesh.hpp"
 
+#include <algorithm>
 #include <iostream>
 
 #include "llgl/VertexArray.hpp"
@@ -9,6 +10,8 @@
 #include "llgl/Uniform.hpp"
 
 #include "dataTemplates/VertexData.hpp"
+
+#include "camera/Camera.hpp"
 
 
 void Border::setFirstPoint(glm::vec3 point)
@@ -31,32 +34,35 @@ void Border::addPoint(glm::vec3 point)
     if(point.z > maxZ) maxZ = point.z;
 }
 
+//----------------------------------------------------------
 
-Mesh::Mesh(
-std::vector<Vertex> vertices, std::vector<unsigned int> indices, Border border)
-: border{border}
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices,
+std::vector<glm::vec3> verticesOpt, std::vector<unsigned int> indicesOpt,
+Border border)
+: vertices{vertices}
+, indices{indices}
+, optimalizeVertices{verticesOpt}
+, optimalizeIndices{indicesOpt}
+, border{border}
 {
-    this->vertices = vertices;
-    this->indices  = indices;
-
     initMesh();
     initBorder();
 }
 
-Mesh::Mesh(Mesh&& rhs)
-{
-    this->vertices = std::move(rhs.vertices);
-    this->indices  = std::move(rhs.indices);
-
-    this->vao = std::move(rhs.vao);
-    this->vbo = std::move(rhs.vbo);
-    this->ebo = std::move(rhs.ebo);
-
-    this->vaoBorder      = std::move(rhs.vaoBorder);
-    this->vboBorder      = std::move(rhs.vboBorder);
-    this->eboBorder      = std::move(rhs.eboBorder);
-    this->bolderElements = rhs.bolderElements;
-}
+Mesh::Mesh(Mesh &&rhs)
+: vao{std::move(rhs.vao)}
+, vbo{std::move(rhs.vbo)}
+, ebo{std::move(rhs.ebo)}
+, vaoBorder{std::move(rhs.vaoBorder)}
+, vboBorder{std::move(rhs.vboBorder)}
+, eboBorder{std::move(rhs.eboBorder)}
+, bolderElements{rhs.bolderElements}
+, vertices{std::move(rhs.vertices)}
+, indices{std::move(rhs.indices)}
+, optimalizeVertices{std::move(rhs.optimalizeVertices)}
+, optimalizeIndices{std::move(rhs.optimalizeIndices)}
+, border{rhs.border}
+{}
 
 Mesh::~Mesh() = default;
 
@@ -128,4 +134,36 @@ void Mesh::drawBorder(std::shared_ptr<llgl::ShaderProgram> program)
     vaoBorder->bind();
     eboBorder->bind();
     glDrawElements(GL_LINES, bolderElements, GL_UNSIGNED_INT, 0);
+}
+
+glm::vec3 Mesh::toVec3(glm::vec4 vec)
+{
+    return vec / vec.w;
+}
+
+void Mesh::reycast(Camera *camera, float x, float y)
+{
+    glm::mat4 mvp = camera->getProjection() * camera->getView()
+                    * glm::scale(glm::mat4{1}, glm::vec3{0.05f, 0.05f, 0.05f});
+
+    std::vector<glm::vec3> transforVertices;
+    transforVertices.reserve(optimalizeVertices.size());
+    for(unsigned int i = 0; i < optimalizeIndices.size(); i++) {
+        transforVertices.push_back(
+        toVec3(mvp * glm::vec4(optimalizeVertices[i], 1)));
+    }
+
+    checkVertex(transforVertices, {x, y});
+}
+
+void Mesh::checkVertex(std::vector<glm::vec3> &vertices, Position mouse)
+{
+    for(std::size_t i = 0; i < vertices.size(); i++) {
+        float distance = glm::length(glm::vec2(vertices[i]) - mouse);
+
+        if(distance < 0.02f) {
+            std::cout << ".";
+        }
+    }
+    std::cout << std::endl;
 }

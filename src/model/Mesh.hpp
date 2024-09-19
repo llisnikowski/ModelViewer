@@ -31,22 +31,33 @@ struct Border
 };
 
 class Loader;
+class Camera;
 
 class Mesh
 {
 public:
+    using Vertices = std::vector<glm::vec3>;
+    using Position = glm::vec2;
+
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices,
+    std::vector<glm::vec3> verticesOpt, std::vector<unsigned int> indicesOpt,
     Border border);
-    Mesh(Mesh&& rhs);
+    Mesh(Mesh &&rhs);
     ~Mesh();
 
     void draw(std::shared_ptr<llgl::ShaderProgram> program);
     void drawBorder(std::shared_ptr<llgl::ShaderProgram> program);
 
     Border getBorder();
+
+    void reycast(Camera *camera, float x, float y);
 private:
     void initMesh();
     void initBorder();
+
+    void checkVertex(std::vector<glm::vec3> &vertices, Position mouse);
+
+    glm::vec3 toVec3(glm::vec4 vec);
 
     std::unique_ptr<llgl::VertexArray> vao;
     std::shared_ptr<llgl::VertexBuffer> vbo;
@@ -59,6 +70,9 @@ private:
 
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
+
+    std::vector<glm::vec3> optimalizeVertices;
+    std::vector<unsigned int> optimalizeIndices;
 
     Border border;
 };

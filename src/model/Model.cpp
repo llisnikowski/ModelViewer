@@ -24,3 +24,10 @@ void Model::drawBorder(std::shared_ptr<llgl::ShaderProgram> program)
         meshes[i].drawBorder(program);
     }
 }
+
+void Model::reycast(Camera *camera, float x, float y)
+{
+    for(unsigned int i = 0; i < meshes.size(); i++) {
+        meshes[i].reycast(camera, x, y);
+    }
+}

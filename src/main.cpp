@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
             shader->bind();
 
             shader->getUniform("model").setMat4(
-            glm::scale(glm::mat4{1}, glm::vec3{0.02f, 0.02f, 0.02f}));
+            glm::scale(glm::mat4{1}, glm::vec3{0.05f, 0.05f, 0.05f}));
             shader->getUniform("view").setMat4(
             CameraManager::camera->getView());
             shader->getUniform("projection")
@@ -217,6 +217,9 @@ int main(int argc, char* argv[])
             * CameraManager::camera->getView()
             * glm::scale(glm::mat4{1}, glm::vec3{0.05f, 0.05f, 0.05f}));
             model.drawBorder(shader);
+
+            model.reycast(CameraManager::camera.get(),
+            mouseInfo.x / (1280. / 2.) - 1., -mouseInfo.y / (720. / 2.) + 1.);
         }
 
 

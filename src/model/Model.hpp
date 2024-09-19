@@ -18,6 +18,7 @@ class VertexBuffer;
 class ElementBuffer;
 class ShaderProgram;
 }
+class Camera;
 
 class Model
 {
@@ -27,6 +28,7 @@ public:
     void draw(std::shared_ptr<llgl::ShaderProgram> program);
     void drawBorder(std::shared_ptr<llgl::ShaderProgram> program);
 
+    void reycast(Camera *camera, float x, float y);
 private:
     std::vector<Mesh> meshes;
 };
